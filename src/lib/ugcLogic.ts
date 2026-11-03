@@ -117,40 +117,6 @@ export function optimizePreferenceOrder<T extends PreferencePlanItem>(items: T[]
   });
 }
 
-const GRADE_WEIGHTS: Record<ALGrade, number> = {
-  A: 0.65,
-  B: 0.38,
-  C: 0.14,
-  S: -0.08,
-  F: -0.6,
-};
-
-const STREAM_OFFSET: Record<string, number> = {
-  'Biological Science': 0.08,
-  'Physical Science': 0.12,
-  Commerce: 0.02,
-  Technology: 0.04,
-  Arts: -0.04,
-  Other: 0.0,
-};
-
-/**
- * Estimates a student's approximate G.C.E. A/L Z-score from 3 subject grades and stream.
- */
-export function estimateZScoreFromGrades(grades: [ALGrade, ALGrade, ALGrade], stream: string): number {
-  const sum = grades.reduce((acc, g) => acc + (GRADE_WEIGHTS[g] ?? 0), 0);
-  const offset = STREAM_OFFSET[stream] ?? 0;
-  return Number(Math.max(-1.0, Math.min(2.85, sum + offset)).toFixed(4));
-}
-
-const GRADE_RANK: Record<ALGrade, number> = {
-  A: 4,
-  B: 3,
-  C: 2,
-  S: 1,
-  F: 0,
-};
-
 export interface SubjectGradePair {
   subject: string;
   grade: ALGrade;
@@ -162,6 +128,51 @@ export interface SubjectRequirementsSpec {
   min_grade?: ALGrade;
   notes?: string;
 }
+
+/**
+ * Checks whether a student's chosen 3 A/L subject combination satisfies a course's
+ * subject prerequisites (without requiring grades or Z-score, e.g. for pending-result students).
+ */
+export function checkSubjectCombinationEligibility(
+  studentSubjectNames: string[],
+  requirements: SubjectRequirementsSpec
+): { eligible: boolean; reason: string } {
+  const normSubs = studentSubjectNames.map((s) => s.trim().toLowerCase());
+
+  if (requirements.required_subjects && requirements.required_subjects.length > 0) {
+    for (const reqSub of requirements.required_subjects) {
+      const found = normSubs.some((s) => s === reqSub.toLowerCase());
+      if (!found) {
+        return {
+          eligible: false,
+          reason: `Requires ${reqSub}.`,
+        };
+      }
+    }
+  }
+
+  if (requirements.any_of_subjects && requirements.any_of_subjects.length > 0) {
+    const hasOne = requirements.any_of_subjects.some((reqSub) =>
+      normSubs.some((s) => s === reqSub.toLowerCase())
+    );
+    if (!hasOne) {
+      return {
+        eligible: false,
+        reason: `Requires at least one of (${requirements.any_of_subjects.join(', ')}).`,
+      };
+    }
+  }
+
+  return { eligible: true, reason: 'Subject prerequisites satisfied.' };
+}
+
+const GRADE_RANK: Record<ALGrade, number> = {
+  A: 4,
+  B: 3,
+  C: 2,
+  S: 1,
+  F: 0,
+};
 
 export function checkSubjectEligibility(
   studentSubjects: SubjectGradePair[],

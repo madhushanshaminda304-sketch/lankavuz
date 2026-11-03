@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { NON_STATE_IFSLS_PATHWAYS } from '../services/ugcDataService';
+import { DegreeRoiCalculator } from './DegreeRoiCalculator';
 
 const POPULAR_PRESETS = [
   {
@@ -337,6 +338,9 @@ export const CompareEngineView: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Interactive 4-Year Cost, IFSLS Loan & Salary ROI Calculator */}
+      <DegreeRoiCalculator />
 
       {/* State + Non-State / IFSLS Student Loan Bridge */}
       <section className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 space-y-5 shadow-xs">

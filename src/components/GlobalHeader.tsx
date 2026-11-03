@@ -11,6 +11,7 @@ import {
   X,
   Check,
   Sparkles,
+  Building2,
 } from 'lucide-react';
 import { useApp, type LanguageCode, type ActiveRoute } from '../context/AppContext';
 import { SRI_LANKA_DISTRICTS, UGC_INSTITUTIONS } from '../services/ugcDataService';
@@ -33,6 +34,7 @@ export const GlobalHeader: React.FC = () => {
     setIsCafDrawerOpen,
     openInstitutionProfile,
     openCourseProfile,
+    setIsWelcomeOpen,
   } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,6 +82,7 @@ export const GlobalHeader: React.FC = () => {
     { id: 'home', label: t.navCatalog, icon: <GraduationCap className="w-4 h-4" /> },
     { id: 'compare', label: t.navCompare, icon: <Scale className="w-4 h-4" />, badge: compareList.length },
     { id: 'careers', label: t.navCareers, icon: <Compass className="w-4 h-4" /> },
+    { id: 'private-unis', label: t.navPrivateUnis ?? 'Private Campuses', icon: <Building2 className="w-4 h-4" /> },
     { id: 'calendar', label: t.navCalendar, icon: <Calendar className="w-4 h-4" /> },
   ];
 
@@ -222,6 +225,17 @@ export const GlobalHeader: React.FC = () => {
                 </button>
               ))}
             </div>
+
+            {/* Quick Setup Modal Replay */}
+            <button
+              type="button"
+              onClick={() => setIsWelcomeOpen(true)}
+              title="Replay Onboarding & Personalization Setup"
+              className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-slate-900/80 hover:bg-slate-800 border border-slate-700 hover:border-amber-400/50 text-amber-300 text-xs font-semibold interactive-surface"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Quick Setup</span>
+            </button>
 
             <button
               type="button"

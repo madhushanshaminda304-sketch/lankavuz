@@ -20,7 +20,8 @@ export type ActiveRoute =
   | 'career-quiz'
   | 'calendar'
   | 'institution'
-  | 'course';
+  | 'course'
+  | 'private-unis';
 
 export interface SavedPreferenceEntry {
   uni_code: string;
@@ -61,6 +62,8 @@ export interface AppContextValue {
   setIsCafDrawerOpen: (v: boolean) => void;
   openInstitutionProfile: (code: string) => void;
   openCourseProfile: (uniCode: string) => void;
+  isWelcomeOpen: boolean;
+  setIsWelcomeOpen: (open: boolean) => void;
 }
 
 const I18N_DICT: Record<LanguageCode, Record<string, string>> = {
@@ -71,6 +74,7 @@ const I18N_DICT: Record<LanguageCode, Record<string, string>> = {
     navCompare: 'Compare (4-Way)',
     navCareers: 'Career Compass',
     navCalendar: 'Admissions Calendar',
+    navPrivateUnis: 'Private & Non-State Campuses',
     myPlan: 'My UGC Plan',
     quotaBadge: 'Active Quota District',
     changeDistrict: 'Change',
@@ -98,7 +102,8 @@ const I18N_DICT: Record<LanguageCode, Record<string, string>> = {
     navCatalog: 'பல்கலைக்கழகங்கள் & பாடநெறிகள்',
     navCompare: 'ஒப்பீடு (4-வழி)',
     navCareers: 'தொழில் வழிகாட்டி',
-    navCalendar: 'சேர்க்கை நாட்காட்டி',
+    navCalendar: 'சேர்க்கை நாட்கාட்டி',
+    navPrivateUnis: 'தனியார் & அரச சார்பற்ற பல்கலைக்கழகங்கள்',
     myPlan: 'எனது UGC திட்டம்',
     quotaBadge: 'மாவட்ட ஒதுக்கீடு',
     changeDistrict: 'மாற்று',
@@ -121,6 +126,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [isDistrictModalOpen, setIsDistrictModalOpen] = useState(false);
+  const [isWelcomeOpen, setIsWelcomeOpen] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('lankavuz_welcome_seen') !== 'v1';
+    } catch {
+      return false;
+    }
+  });
   const [lang, setLang] = useState<LanguageCode>('EN');
   const [route, setRouteState] = useState<ActiveRoute>('home');
   const [selectedInstitutionCode, setSelectedInstitutionCode] = useState<string>('UOM');
@@ -174,7 +186,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setRouteState('course');
       }
     } else if (
-      ['home', 'predictor', 'my-plan', 'compare', 'careers', 'career-quiz', 'calendar'].includes(
+      ['home', 'predictor', 'my-plan', 'compare', 'careers', 'career-quiz', 'calendar', 'private-unis'].includes(
         hash
       )
     ) {
@@ -347,6 +359,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsCafDrawerOpen,
         openInstitutionProfile,
         openCourseProfile,
+        isWelcomeOpen,
+        setIsWelcomeOpen,
       }}
     >
       {children}

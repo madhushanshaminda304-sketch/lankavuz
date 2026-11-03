@@ -193,3 +193,32 @@ CREATE TABLE IF NOT EXISTS public.qna_threads (
   verified_ambassador BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- 9. Private, Foreign-Affiliated & Non-State Programs (Tiers 2, 3, 4)
+CREATE TABLE IF NOT EXISTS public.private_programs (
+  id TEXT PRIMARY KEY,
+  tier TEXT NOT NULL CHECK (tier IN ('TIER_2_STATE_NON_UGC', 'TIER_3_MOHE_DAI_IFSLS', 'TIER_4_FOREIGN_AFFILIATED')),
+  institute_code TEXT NOT NULL,
+  institute_name TEXT NOT NULL,
+  institute_abbr TEXT NOT NULL,
+  degree_title TEXT NOT NULL,
+  awarding_body TEXT NOT NULL,
+  country_of_award TEXT NOT NULL DEFAULT 'Sri Lanka',
+  duration_years INT NOT NULL DEFAULT 4,
+  entry_qualifications JSONB NOT NULL DEFAULT '["AL_PASS"]'::jsonb,
+  financial_aid_types JSONB NOT NULL DEFAULT '["IFSLS_LOAN"]'::jsonb,
+  tuition_total_lkr INT,
+  tuition_note TEXT NOT NULL,
+  intake_months JSONB NOT NULL DEFAULT '["January", "September"]'::jsonb,
+  mandatory_internship BOOLEAN NOT NULL DEFAULT FALSE,
+  internship_note TEXT,
+  mohe_approved BOOLEAN NOT NULL DEFAULT FALSE,
+  ugc_recognized_foreign BOOLEAN NOT NULL DEFAULT FALSE,
+  iesl_accredited BOOLEAN NOT NULL DEFAULT FALSE,
+  slmc_recognized BOOLEAN NOT NULL DEFAULT FALSE,
+  tvec_nvq_level TEXT,
+  state_equivalent_uni_code TEXT,
+  location TEXT NOT NULL,
+  website TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);

@@ -16,9 +16,11 @@ import {
   InstitutionAndCourseProfileView,
   AdmissionsCalendarView,
 } from './components/ProfileAndCalendarView';
+import { WelcomeSplashModal } from './components/WelcomeSplashModal';
+import { PrivateUniversitiesView } from './components/PrivateUniversitiesView';
 
 const AppRouterContent: React.FC = () => {
-  const { route, district, setRoute, setIsCafDrawerOpen } = useApp();
+  const { route, district, setRoute, setIsCafDrawerOpen, isWelcomeOpen, setIsWelcomeOpen } = useApp();
 
   useEffect(() => {
     const titles: Record<string, string> = {
@@ -29,6 +31,7 @@ const AppRouterContent: React.FC = () => {
       careers: `Sri Lanka Career-to-Degree Atlas & LKR Salary Guide — LankaVuz`,
       'career-quiz': `3-Minute RIASEC & Klimov Career Compass Quiz — LankaVuz`,
       calendar: `Sri Lanka UGC Admissions & Aptitude Test Calendar — LankaVuz`,
+      'private-unis': `Sri Lanka Private, Foreign & Non-State University Hub (${district.district_name}) — LankaVuz`,
       institution: `State University Profile & 25-District Cutoffs — LankaVuz`,
       course: `UGC uni_code Course Cutoff Matrix & Reviews — LankaVuz`,
     };
@@ -49,10 +52,12 @@ const AppRouterContent: React.FC = () => {
         {route === 'calendar' && <AdmissionsCalendarView />}
         {route === 'institution' && <InstitutionAndCourseProfileView mode="institution" />}
         {route === 'course' && <InstitutionAndCourseProfileView mode="course" />}
+        {route === 'private-unis' && <PrivateUniversitiesView />}
       </main>
 
       <PreferenceSimulatorDrawer />
       <SingleWindowCafDrawer />
+      <WelcomeSplashModal isOpen={isWelcomeOpen} onClose={() => setIsWelcomeOpen(false)} />
 
       {/* Authoritative Footer */}
       <footer className="bg-[var(--color-brand-primary)] text-slate-300 border-t border-slate-800 py-10 px-4 sm:px-6 lg:px-8 no-print">
@@ -98,6 +103,11 @@ const AppRouterContent: React.FC = () => {
               <li>
                 <button type="button" onClick={() => setRoute('career-quiz')} className="hover:text-amber-300">
                   3-Minute RIASEC & Klimov Quiz
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => setRoute('private-unis')} className="hover:text-amber-300 text-amber-300 font-semibold">
+                  🏛️ Private, Foreign & IFSLS Degrees
                 </button>
               </li>
               <li>

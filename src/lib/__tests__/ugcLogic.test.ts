@@ -3,7 +3,7 @@ import {
   classifyProgramMatch,
   auditPreferenceOrder,
   optimizePreferenceOrder,
-  estimateZScoreFromGrades,
+  checkSubjectCombinationEligibility,
   checkSubjectEligibility,
 } from '../ugcLogic';
 import {
@@ -80,12 +80,32 @@ describe('ugcLogic — Sri Lankan UGC Z-Score & Preference Order Engine', () => 
     expect(optimized[3].uni_code).toBe('013B');
   });
 
-  it('estimates realistic Z-score from 3 A/L grades and stream', () => {
-    const highZ = estimateZScoreFromGrades(['A', 'A', 'A'], 'Physical Science');
-    const midZ = estimateZScoreFromGrades(['B', 'B', 'C'], 'Physical Science');
-    expect(highZ).toBeGreaterThan(1.7);
-    expect(midZ).toBeGreaterThan(0.7);
-    expect(highZ).toBeGreaterThan(midZ);
+  it('filters eligible uni_code programs accurately by 3-subject combination without fabricating a Z-score', () => {
+    // Student with Physical Science subjects (Combined Maths, Physics, Chemistry)
+    const physSubjects = ['Combined Mathematics', 'Physics', 'Chemistry'];
+
+    // Engineering requirements: Combined Maths, Physics, Chemistry
+    const engReq = {
+      required_subjects: ['Combined Mathematics', 'Physics', 'Chemistry'],
+    };
+    const engCheck = checkSubjectCombinationEligibility(physSubjects, engReq);
+    expect(engCheck.eligible).toBe(true);
+
+    // Medicine requirements: Biology, Chemistry, Physics
+    const medReq = {
+      required_subjects: ['Biology', 'Chemistry', 'Physics'],
+    };
+    const medCheck = checkSubjectCombinationEligibility(physSubjects, medReq);
+    expect(medCheck.eligible).toBe(false);
+    expect(medCheck.reason).toContain('Requires Biology');
+
+    // Computer Science pool requirement (e.g. at least one of Chemistry, Physics, ICT)
+    const csReq = {
+      required_subjects: ['Combined Mathematics'],
+      any_of_subjects: ['Physics', 'Chemistry', 'Information & Communication Technology'],
+    };
+    const csCheck = checkSubjectCombinationEligibility(physSubjects, csReq);
+    expect(csCheck.eligible).toBe(true);
   });
 
   it('validates 3-subject eligibility and minimum Common General Test (>= 30%)', () => {

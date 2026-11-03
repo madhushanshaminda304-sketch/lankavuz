@@ -83,3 +83,15 @@
 - [x] **Slice 4 (Prompt 4)**: Implement deep-link URL hash routing (`#predictor`, `#course/008G`, `#institution/UOM`), interactive 1–5 star rating selectors, and filtered Reviews/Q&A.
 - [x] **Verification**: `npx vitest run` (8/8 passing) + `npm run build` (clean 0-error Vite/TypeScript build).
 
+
+## Change 2026-11-03: LankaVuz v2.0 — Private Universities, Welcome Animation & Z-Score Predictor Upgrade
+- **triage**: Size M | Types: `feature`, `upgrade`, `motion`, `content`
+- **safety**: Branch `change/v2-private-welcome-predictor` created from clean `main` (commit `7aba302`).
+- **baseline**: Vitest `8/8` passing; `npm run build` clean (`0` errors).
+
+### Slices
+- [x] **Slice 1 (Prompt 1)**: Removed inaccurate `estimateZScoreFromGrades` and upgraded Predictor to dual modes: "I Have My Official Z-Score" (`official_z`) and "A/L Results Pending — Explore by 3-Subject Combination" (`subject_explorer`) with target district benchmarks and aptitude test alerts.
+- [x] **Slice 2 (Prompt 2)**: Built Functional First-Visit Welcome Curtain (`src/components/WelcomeSplashModal.tsx`) with 3-tap personalization (Language, District, Journey Stage), animated stat counter, curtain lift exit, and `Quick Setup` replay button in `GlobalHeader.tsx`.
+- [x] **Slice 3 (Prompt 3)**: Built Dedicated "Private, Foreign-Affiliated & Non-State Universities Hub" (`/private-unis` route, `src/components/PrivateUniversitiesView.tsx`, `PRIVATE_AND_ALTERNATIVE_PROGRAMS` dataset across Tiers 2, 3, and 4, and `private_programs` table in `supabase/schema.sql`).
+- [x] **Slice 4 (Prompt 4)**: Built interactive "4-Year Degree Cost, IFSLS Loan Repayment & Salary ROI Calculator" widget (`src/components/DegreeRoiCalculator.tsx`) and integrated into `CompareEngineView.tsx` and `PrivateUniversitiesView.tsx`.
+- [x] **Verification**: `npx vitest run` (8/8 passing) + `npm run build` (zero errors, 5.69s).
