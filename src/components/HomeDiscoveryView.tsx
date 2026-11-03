@@ -3,40 +3,32 @@ import {
   Calculator,
   Building2,
   BookOpen,
-  Compass,
-  MapPin,
   ArrowRight,
   Sparkles,
+  MapPin,
+  ExternalLink,
   ShieldCheck,
-  ListChecks,
+  CheckCircle2,
+  GraduationCap,
   Scale,
+  Award,
+  Globe,
+  Users,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { UGC_INSTITUTIONS, UGC_COURSES } from '../services/ugcDataService';
+import {
+  SRI_LANKA_DISTRICTS,
+  UGC_COURSES,
+  UGC_INSTITUTIONS,
+  NON_STATE_IFSLS_PATHWAYS,
+} from '../data/sriLankaUgcSnapshot';
 import { ProgramChanceCard } from './ProgramChanceCard';
-
-type HeroTab = 'zscore' | 'universities' | 'courses' | 'careers';
-
-const CAREER_FIELD_CARDS = [
-  { id: 'IT & Computing', title: 'IT, AI & Computing', count: '14 UGC Programs + SLIIT/NSBM IFSLS', salary: 'LKR 150k – 950k/mo' },
-  { id: 'Engineering & Tech', title: 'Engineering & Technology', count: '12 UGC Engineering & BET Options', salary: 'LKR 120k – 650k/mo' },
-  { id: 'Medicine & Allied Health', title: 'Medicine, Dental & Allied Health', count: '11 MBBS, BDS & Health Sciences', salary: 'LKR 165k – 850k/mo' },
-  { id: 'Business & Finance', title: 'Management, Finance & Commerce', count: '16 BBM, BCom & Finance Degrees', salary: 'LKR 95k – 620k/mo' },
-  { id: 'Agriculture & Food Science', title: 'Agriculture, Food & Biosystems', count: '9 BSc AgTech & BBST Degrees', salary: 'LKR 90k – 480k/mo' },
-  { id: 'Architecture & Design', title: 'Architecture & Quantity Surveying', count: 'UOM BArch, QS & Design Options', salary: 'LKR 110k – 900k/mo' },
-  { id: 'Law & Governance', title: 'Law (LLB) & Policy', count: 'UOC, UOP & UOJ LLB (Hons)', salary: 'LKR 95k – 750k/mo' },
-  { id: 'Physical & Natural Sciences', title: 'Physical & Natural Sciences', count: 'Physics, Stats, Applied Math', salary: 'LKR 90k – 450k/mo' },
-  { id: 'Humanities & Languages', title: 'Humanities, Economics & Media', count: 'BA (Hons) & Mass Media', salary: 'LKR 75k – 340k/mo' },
-  { id: 'Indigenous Medicine', title: 'Ayurveda, Unani & Siddha Medicine', count: 'IIM & GWUIM Clinical Degrees', salary: 'LKR 110k – 390k/mo' },
-  { id: 'Performing & Visual Arts', title: 'Visual & Performing Arts', count: 'UVPA, SVIAS & SCPC Degrees', salary: 'LKR 80k – 320k/mo' },
-  { id: 'Vocational & NVQ Level 7', title: 'TVEC NVQ 5/6/7 & IFSLS Loans', count: 'SLIATE HND, UoVT BTech & IFSLS', salary: 'LKR 95k – 500k/mo' },
-];
 
 export const HomeDiscoveryView: React.FC = () => {
   const {
     district,
+    setDistrictId,
     setIsDistrictModalOpen,
-    t,
     districtPrograms,
     studentZScore,
     setStudentZScore,
@@ -47,467 +39,310 @@ export const HomeDiscoveryView: React.FC = () => {
     openCourseProfile,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<HeroTab>('zscore');
-  const [selectedStreamFilter, setSelectedStreamFilter] = useState<string>('ALL');
-  const [selectedCareerCategory, setSelectedCareerCategory] = useState<string>('ALL');
+  const [heroZInput, setHeroZInput] = useState<string>(
+    studentZScore !== null ? studentZScore.toFixed(4) : '1.5200'
+  );
 
+  const handleHeroSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = parseFloat(heroZInput);
+    if (!isNaN(parsed)) {
+      setStudentZScore(parsed);
+    }
+    setRoute('predictor');
+  };
+
+  // Quick 6 curated offerings for the active district
   const quickMatches = useMemo(() => {
     return districtPrograms
-      .filter((p) => studentStream === 'ALL' || p.stream === studentStream || p.stream === 'Other')
+      .filter((p) => {
+        if (studentStream !== 'ALL' && p.stream !== studentStream && p.stream !== 'Other') {
+          return false;
+        }
+        return true;
+      })
       .slice(0, 6);
   }, [districtPrograms, studentStream]);
 
-  const filteredCourses = useMemo(() => {
-    return UGC_COURSES.filter(
-      (c) =>
-        (selectedStreamFilter === 'ALL' || c.stream === selectedStreamFilter) &&
-        (selectedCareerCategory === 'ALL' || c.career_category === selectedCareerCategory)
-    );
-  }, [selectedStreamFilter, selectedCareerCategory]);
-
-  const institutionSummaries = useMemo(() => {
-    return UGC_INSTITUTIONS.map((inst) => {
-      const offerings = districtPrograms.filter((p) => p.institution_code === inst.institution_code);
-      const validCutoffs = offerings
-        .map((o) => o.min_z_score)
-        .filter((z): z is number => z !== null);
-      const totalSeats = offerings.reduce((acc, o) => acc + o.proposed_intake, 0);
-      const minZ = validCutoffs.length ? Math.min(...validCutoffs) : null;
-      const maxZ = validCutoffs.length ? Math.max(...validCutoffs) : null;
-      return {
-        ...inst,
-        uniCodeCount: offerings.length,
-        totalSeats,
-        minZ,
-        maxZ,
-      };
-    });
-  }, [districtPrograms]);
-
   return (
-    <div className="space-y-10 pb-20">
-      {/* Vuzopedia-inspired Stage Hero with 25-District Quota Context & 4-Tab Discovery Bar */}
-      <section className="bg-[var(--color-brand-primary)] text-white border-b border-slate-800 pt-8 pb-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/90 border border-slate-700 text-xs text-amber-300 mb-4">
-              <MapPin className="w-3.5 h-3.5" />
+    <div className="space-y-12 pb-24">
+      {/* ========================================================
+          PRESTIGIOUS HERO & INTERACTIVE STRATEGY DECK
+         ======================================================== */}
+      <section className="bg-gradient-to-b from-[var(--primitive-obsidian-950)] via-[var(--primitive-obsidian-900)] to-[var(--primitive-obsidian-850)] text-white border-b border-slate-800/80 pt-10 pb-14 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* Subtle background ambient light */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-sky-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto relative z-10 space-y-8">
+          {/* Top Pill: District Quota Context */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-700/80 text-xs text-amber-300">
+              <MapPin className="w-3.5 h-3.5 text-amber-400" />
               <span>
-                Active Quota District: <strong>{district.district_name}</strong> ({district.name_si} · {district.name_ta})
+                Active Quota District: <strong>{district.district_name}</strong> (#{district.district_id})
               </span>
               <button
                 type="button"
                 onClick={() => setIsDistrictModalOpen(true)}
-                className="underline text-white hover:text-amber-300 ml-1 font-semibold"
+                className="underline hover:text-white ml-1 font-bold text-amber-200"
               >
                 Change
               </button>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-              {t.heroTitle}
+            <span className="text-xs text-slate-400 hidden sm:inline-flex items-center gap-1.5 font-medium">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Official 2024/2025 Academic Cutoff Data Verified</span>
+            </span>
+          </div>
+
+          {/* Hero Typography */}
+          <div className="max-w-3xl space-y-3">
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+              Sri Lanka Higher Education & 2024/25 Cutoff Atlas
             </h1>
-            <p className="mt-2.5 text-sm sm:text-base text-slate-300 leading-relaxed">
-              {t.heroSub}
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+              Compare your official G.C.E. A/L Z-score directly against verified historical cutoffs across 21 State UGC Universities, MOHE Interest-Free Student Loans (IFSLS), and Direct Private / Foreign Degree Pathways.
             </p>
           </div>
 
-          {/* 4-Tab Hero Discovery Bar */}
-          <div className="mt-7 bg-white text-slate-900 rounded-xl shadow-xl border border-slate-200 overflow-hidden">
-            <div
-              role="tablist"
-              aria-label="Discovery modes"
-              className="grid grid-cols-2 lg:grid-cols-4 border-b border-slate-200 bg-slate-100"
-            >
-              <button
-                role="tab"
-                aria-selected={activeTab === 'zscore'}
-                type="button"
-                onClick={() => setActiveTab('zscore')}
-                className={`flex items-center justify-center gap-2 px-4 py-3.5 text-xs sm:text-sm font-bold border-b-2 interactive-surface ${
-                  activeTab === 'zscore'
-                    ? 'bg-white border-amber-600 text-slate-950'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
+          {/* ========================================================
+              INTERACTIVE 3-INPUT QUICK-CHECK BAR (Hero Action Deck)
+             ======================================================== */}
+          <form
+            onSubmit={handleHeroSubmit}
+            className="p-3 sm:p-4 rounded-2xl glass-panel-dark border border-slate-700/80 shadow-2xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end"
+          >
+            {/* 1. District */}
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                <span>1. Quota District</span>
+              </label>
+              <select
+                value={district.district_id}
+                onChange={(e) => setDistrictId(Number(e.target.value))}
+                className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs sm:text-sm font-semibold text-white focus:border-amber-400 focus:outline-hidden"
               >
-                <Calculator className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>1. Course & Cutoff Finder</span>
-              </button>
-
-              <button
-                role="tab"
-                aria-selected={activeTab === 'universities'}
-                type="button"
-                onClick={() => setActiveTab('universities')}
-                className={`flex items-center justify-center gap-2 px-4 py-3.5 text-xs sm:text-sm font-bold border-b-2 interactive-surface ${
-                  activeTab === 'universities'
-                    ? 'bg-white border-amber-600 text-slate-950'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Building2 className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>2. By University (21 State)</span>
-              </button>
-
-              <button
-                role="tab"
-                aria-selected={activeTab === 'courses'}
-                type="button"
-                onClick={() => setActiveTab('courses')}
-                className={`flex items-center justify-center gap-2 px-4 py-3.5 text-xs sm:text-sm font-bold border-b-2 interactive-surface ${
-                  activeTab === 'courses'
-                    ? 'bg-white border-amber-600 text-slate-950'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <BookOpen className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>3. By Degree Course (UGC)</span>
-              </button>
-
-              <button
-                role="tab"
-                aria-selected={activeTab === 'careers'}
-                type="button"
-                onClick={() => setActiveTab('careers')}
-                className={`flex items-center justify-center gap-2 px-4 py-3.5 text-xs sm:text-sm font-bold border-b-2 interactive-surface ${
-                  activeTab === 'careers'
-                    ? 'bg-white border-amber-600 text-slate-950'
-                    : 'border-transparent text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Compass className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>4. By Career & Salary Field</span>
-              </button>
+                {SRI_LANKA_DISTRICTS.map((d) => (
+                  <option key={d.district_id} value={d.district_id}>
+                    {d.district_id}. {d.district_name}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Tab 1 Content: Quick Z-Score + A/L Stream Matcher */}
-            {activeTab === 'zscore' && (
-              <div className="p-5 sm:p-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                  <div>
-                    <label htmlFor="hero-district-btn" className="block text-xs font-bold text-slate-700 mb-1">
-                      G.C.E. A/L District (55% Quota)
-                    </label>
-                    <button
-                      id="hero-district-btn"
-                      type="button"
-                      onClick={() => setIsDistrictModalOpen(true)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-left text-sm font-semibold flex items-center justify-between"
-                    >
-                      <span>
-                        {district.district_name} (#{district.district_id})
-                      </span>
-                      <MapPin className="w-4 h-4 text-amber-600" />
-                    </button>
-                  </div>
+            {/* 2. Stream */}
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1">
+                <GraduationCap className="w-3.5 h-3.5 text-sky-400" />
+                <span>2. G.C.E. A/L Stream</span>
+              </label>
+              <select
+                value={studentStream}
+                onChange={(e) => setStudentStream(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs sm:text-sm font-semibold text-white focus:border-amber-400 focus:outline-hidden"
+              >
+                <option value="Physical Science">Physical Science (Maths)</option>
+                <option value="Biological Science">Biological Science (Bio)</option>
+                <option value="Commerce">Commerce</option>
+                <option value="Technology">Technology</option>
+                <option value="Arts">Arts</option>
+                <option value="ALL">All Streams / Multidisciplinary</option>
+              </select>
+            </div>
 
-                  <div>
-                    <label htmlFor="hero-stream-select" className="block text-xs font-bold text-slate-700 mb-1">
-                      G.C.E. A/L Stream
-                    </label>
-                    <select
-                      id="hero-stream-select"
-                      value={studentStream}
-                      onChange={(e) => setStudentStream(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 bg-white text-sm font-semibold"
-                    >
-                      <option value="Physical Science">Physical Science (Maths)</option>
-                      <option value="Biological Science">Biological Science (Bio)</option>
-                      <option value="Commerce">Commerce</option>
-                      <option value="Technology">Engineering / Biosystems Tech</option>
-                      <option value="Arts">Arts</option>
-                      <option value="ALL">All Streams / Multidisciplinary</option>
-                    </select>
-                  </div>
+            {/* 3. Official Z-Score */}
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1">
+                <Calculator className="w-3.5 h-3.5 text-emerald-400" />
+                <span>3. Official Z-Score (Optional)</span>
+              </label>
+              <input
+                type="number"
+                step="0.0001"
+                min="-1.5"
+                max="3.5"
+                value={heroZInput}
+                onChange={(e) => setHeroZInput(e.target.value)}
+                placeholder="e.g. 1.6250"
+                className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs sm:text-sm font-mono font-bold text-amber-300 placeholder:text-slate-500 focus:border-amber-400 focus:outline-hidden"
+              />
+            </div>
 
-                  <div>
-                    <label htmlFor="hero-z-input" className="block text-xs font-bold text-slate-700 mb-1">
-                      Your Official Z-Score (Optional Filter)
-                    </label>
-                    <input
-                      id="hero-z-input"
-                      type="number"
-                      step="0.01"
-                      min="-1.5"
-                      max="3.5"
-                      value={studentZScore}
-                      onChange={(e) => setStudentZScore(Number(e.target.value))}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 bg-white text-sm font-tabular font-bold"
-                    />
-                  </div>
+            {/* Submit Button */}
+            <div>
+              <button
+                type="submit"
+                className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow-md interactive-surface flex items-center justify-center gap-2"
+              >
+                <span>Explore 2024/25 Cutoffs</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </form>
 
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setRoute('predictor')}
-                      className="w-full px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-sm interactive-surface"
-                    >
-                      <span>Open Advanced Course & Cutoff Finder →</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Tab 2 Content: All 21 State Universities, Campuses & Institutes */}
-            {activeTab === 'universities' && (
-              <div className="p-5 sm:p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs sm:text-sm font-semibold text-slate-700">
-                    All 21 UGC State Universities, Campuses & Institutes — Cutoffs shown for <strong>{district.district_name}</strong>
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto pr-1">
-                  {institutionSummaries.map((inst) => (
-                    <button
-                      key={inst.institution_code}
-                      type="button"
-                      onClick={() => openInstitutionProfile(inst.institution_code)}
-                      className="p-3.5 rounded-lg border border-slate-200 hover:border-amber-500 bg-slate-50/70 hover:bg-white text-left flex flex-col justify-between gap-2 interactive-surface"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-tabular font-extrabold text-xs px-2 py-0.5 rounded bg-[var(--color-brand-primary)] text-amber-300">
-                            {inst.institution_code}
-                          </span>
-                          <span className="text-[11px] font-semibold text-slate-600 px-2 py-0.5 rounded bg-slate-200/70">
-                            {inst.type}
-                          </span>
-                        </div>
-                        <h3 className="font-bold text-sm text-slate-900 mt-1.5">{inst.name}</h3>
-                        <p className="text-xs text-slate-600">{inst.location}</p>
-                      </div>
-                      <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-xs font-tabular text-slate-700">
-                        <span>{inst.uniCodeCount > 0 ? `${inst.uniCodeCount} tracked codes` : 'View profile'}</span>
-                        <span className="font-bold text-emerald-800">
-                          {inst.minZ !== null && inst.maxZ !== null
-                            ? `Z: ${inst.minZ.toFixed(2)}–${inst.maxZ.toFixed(2)}`
-                            : 'UGC Portal'}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Tab 3 Content: By UGC Degree Course */}
-            {activeTab === 'courses' && (
-              <div className="p-5 sm:p-6 space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  {['ALL', 'Biological Science', 'Physical Science', 'Commerce', 'Technology', 'Arts', 'Other'].map(
-                    (s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => {
-                          setSelectedStreamFilter(s);
-                          setSelectedCareerCategory('ALL');
-                        }}
-                        className={`px-3 py-1.5 rounded-md text-xs font-bold ${
-                          selectedStreamFilter === s
-                            ? 'bg-[var(--color-brand-primary)] text-amber-300'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
-                      >
-                        {s === 'ALL' ? 'All Streams' : s}
-                      </button>
-                    )
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto pr-1">
-                  {filteredCourses.map((course) => {
-                    const matchingOption = districtPrograms.find((p) => p.course_code === course.course_code);
-                    return (
-                      <button
-                        key={course.course_code}
-                        type="button"
-                        onClick={() => {
-                          if (matchingOption) openCourseProfile(matchingOption.uni_code);
-                        }}
-                        className="p-3.5 rounded-lg border border-slate-200 hover:border-amber-500 bg-white text-left flex flex-col justify-between gap-2 interactive-surface"
-                      >
-                        <div>
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="font-tabular font-bold text-xs px-2 py-0.5 rounded bg-slate-900 text-amber-300">
-                              Course {course.course_code}
-                            </span>
-                            <span className="text-[11px] font-semibold text-slate-600">{course.stream}</span>
-                          </div>
-                          <h3 className="font-bold text-sm text-slate-900 mt-1.5">{course.name}</h3>
-                          <p className="text-xs text-slate-600 mt-0.5">{course.degree_awarded}</p>
-                        </div>
-                        <span className="text-xs font-bold text-amber-700">
-                          Inspect District Cutoffs & Prerequisites →
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Tab 4 Content: By 12 Interest & Career Fields */}
-            {activeTab === 'careers' && (
-              <div className="p-5 sm:p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto pr-1">
-                  {CAREER_FIELD_CARDS.map((card) => (
-                    <button
-                      key={card.id}
-                      type="button"
-                      onClick={() => setRoute('careers')}
-                      className="p-3.5 rounded-lg border border-slate-200 hover:border-amber-500 bg-slate-50/70 hover:bg-white text-left flex flex-col justify-between gap-1.5 interactive-surface"
-                    >
-                      <h3 className="font-bold text-sm text-slate-900">{card.title}</h3>
-                      <p className="text-xs text-slate-600">{card.count}</p>
-                      <div className="flex items-center justify-between pt-1.5 border-t border-slate-200/70 text-xs">
-                        <span className="font-tabular font-bold text-emerald-800">{card.salary}</span>
-                        <span className="font-semibold text-amber-700">Explore →</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2 text-xs font-medium text-slate-400">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>140+ UGC Degree Codes</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>25 District Quotas Tracked</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>14 MOHE 0% Loan Campuses</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Zero-Prediction Accuracy</span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Vuzopedia "Top Services" Translated for Sri Lanka */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-5">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-              Your Complete Sri Lankan University Admission Toolkit
-            </h2>
-            <p className="text-sm text-slate-600">
-              Every tool updates dynamically for <strong>{district.district_name} District</strong>.
-            </p>
-          </div>
+      {/* ========================================================
+          THE 3 ARCHETYPE DOORS (High-Aesthetic Strategy Cards)
+         ======================================================== */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+        <div>
+          <span className="text-xs font-extrabold text-amber-700 uppercase tracking-wider">
+            Choose Your Journey
+          </span>
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+            Explore Sri Lanka Higher Education Pathways
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600">
+            Select the door tailored to your current examination results and financial preferences.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button
-            type="button"
-            onClick={() => setRoute('predictor')}
-            className="bg-white p-5 rounded-xl border border-slate-200 hover:border-amber-500 text-left shadow-xs flex flex-col justify-between gap-3 interactive-surface"
-          >
-            <div>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 text-xs font-bold">
-                Flagship Tool
-              </span>
-              <h3 className="text-base font-extrabold text-slate-900 mt-2.5">
-                Z-Score + 3-Subject A/L Matcher
-              </h3>
-              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Classifies all UGC uni_codes into Safe, Target, and Reach with explicit NQC & Aptitude Test checks.
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+          {/* Door 1: State UGC Free Degrees */}
+          <article className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-card hover:border-amber-400/80 transition-all flex flex-col justify-between gap-5 group">
+            <div className="space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center font-bold text-xl shadow-xs group-hover:scale-105 transition-transform">
+                🏛️
+              </div>
+              <div>
+                <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Tier 1</span>
+                <h3 className="text-lg font-extrabold text-slate-900 mt-0.5">
+                  State UGC Universities (100% Free)
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                21 State Universities & Campuses (UOM, UOC, UOP, UCSC). Admission based on the official 2024/25 district quota Z-score formula with Mahapola scholarships.
               </p>
+              <div className="pt-2 text-xs font-semibold text-slate-500">
+                • ~45,000 Annual Quota Seats<br />
+                • 140+ Course Codes with Merit Cutoffs
+              </div>
             </div>
-            <span className="text-xs font-bold text-amber-700 inline-flex items-center gap-1">
-              Open Predictor <ArrowRight className="w-3.5 h-3.5" />
-            </span>
-          </button>
 
-          <button
-            type="button"
-            onClick={() => setRoute('my-plan')}
-            className="bg-white p-5 rounded-xl border border-slate-200 hover:border-amber-500 text-left shadow-xs flex flex-col justify-between gap-3 interactive-surface"
-          >
-            <div>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-950 text-xs font-bold">
-                UGC Conflict Auditor
-              </span>
-              <h3 className="text-base font-extrabold text-slate-900 mt-2.5">
-                My UGC Preference Simulator
-              </h3>
-              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Detects if you accidentally placed a lower-cutoff safety course above a higher-cutoff dream course.
-              </p>
-            </div>
-            <span className="text-xs font-bold text-amber-700 inline-flex items-center gap-1">
-              Audit My Preference Order <ListChecks className="w-3.5 h-3.5" />
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setRoute('compare')}
-            className="bg-white p-5 rounded-xl border border-slate-200 hover:border-amber-500 text-left shadow-xs flex flex-col justify-between gap-3 interactive-surface"
-          >
-            <div>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-sky-100 text-sky-900 text-xs font-bold">
-                State + IFSLS Bridge
-              </span>
-              <h3 className="text-base font-extrabold text-slate-900 mt-2.5">
-                4-Way Degree & Loan Comparator
-              </h3>
-              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Compare up to 4 state uni_code programs side-by-side plus MOHE Interest-Free Loan (IFSLS) backups.
-              </p>
-            </div>
-            <span className="text-xs font-bold text-amber-700 inline-flex items-center gap-1">
-              Compare Programs <Scale className="w-3.5 h-3.5" />
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setRoute('career-quiz')}
-            className="bg-white p-5 rounded-xl border border-slate-200 hover:border-amber-500 text-left shadow-xs flex flex-col justify-between gap-3 interactive-surface"
-          >
-            <div>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-slate-900 text-amber-300 text-xs font-bold">
-                "Guru" Career Compass
-              </span>
-              <h3 className="text-base font-extrabold text-slate-900 mt-2.5">
-                3-Minute RIASEC & Salary Roadmap
-              </h3>
-              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Matches your personality, A/L stream, and Z-score to Sri Lankan salaries and NVQ/IFSLS pathways.
-              </p>
-            </div>
-            <span className="text-xs font-bold text-amber-700 inline-flex items-center gap-1">
-              Take 12-Question Quiz <Sparkles className="w-3.5 h-3.5" />
-            </span>
-          </button>
-        </div>
-      </section>
-
-      {/* Live Preview of District Cutoffs & Admission Chances */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-              Live {district.district_name} District Cutoffs ({studentStream})
-            </h2>
-            <p className="text-sm text-slate-600">
-              Showing instant admission chances for Z-Score <strong className="font-tabular">{studentZScore.toFixed(4)}</strong>.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setRoute('predictor')}
-              className="px-4 py-2 rounded-lg bg-[var(--color-brand-primary)] text-white text-xs sm:text-sm font-bold hover:bg-slate-800"
+              className="w-full py-2.5 px-4 rounded-xl bg-[var(--primitive-obsidian-900)] hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
             >
-              View All {districtPrograms.length} Tracked Offerings →
+              <span>Explore State Cutoffs ({district.district_name}) →</span>
             </button>
+          </article>
+
+          {/* Door 2: MOHE IFSLS 0% Govt Loan */}
+          <article className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-card hover:border-emerald-500/80 transition-all flex flex-col justify-between gap-5 group">
+            <div className="space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-emerald-900 text-emerald-300 flex items-center justify-center font-bold text-xl shadow-xs group-hover:scale-105 transition-transform">
+                💰
+              </div>
+              <div>
+                <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Tier 2</span>
+                <h3 className="text-lg font-extrabold text-slate-900 mt-0.5">
+                  MOHE 0% Interest Loans (IFSLS)
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                100% government-funded tuition by Bank of Ceylon / People's Bank at 0% interest for 3 A/L passes. No upfront tuition required; repaid over 7 years post-graduation.
+              </p>
+              <div className="pt-2 text-xs font-semibold text-slate-500">
+                • LKR 0 Upfront Out-of-Pocket<br />
+                • SLIIT, NSBM, CINEC, Horizon & 14 Institutes
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={() => setRoute('private-unis')}
-              className="px-4 py-2 rounded-lg border border-amber-600 bg-amber-50 text-amber-950 text-xs sm:text-sm font-bold hover:bg-amber-100 inline-flex items-center gap-1.5"
+              className="w-full py-2.5 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
             >
-              <ShieldCheck className="w-4 h-4 text-amber-700" />
-              <span>Explore IFSLS Loan Backups →</span>
+              <span>Explore 14 IFSLS Degrees →</span>
             </button>
+          </article>
+
+          {/* Door 3: Direct Private, Foreign & Foundation Degrees */}
+          <article className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-card hover:border-purple-400/80 transition-all flex flex-col justify-between gap-5 group">
+            <div className="space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-purple-950 text-purple-300 flex items-center justify-center font-bold text-xl shadow-xs group-hover:scale-105 transition-transform">
+                🌏
+              </div>
+              <div>
+                <span className="text-[11px] font-bold text-purple-800 uppercase tracking-wider">Tier 3 & 4</span>
+                <h3 className="text-lg font-extrabold text-slate-900 mt-0.5">
+                  Direct Private & Foreign Degrees
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Direct UK, Australian & State Non-UGC degrees (IIT, OUSL, UoVT, SLIATE). Flexible intakes with pending A/L results, O/L foundation tracks, or weekend working modes.
+              </p>
+              <div className="pt-2 text-xs font-semibold text-slate-500">
+                • British & Australian Partner Universities<br />
+                • 1-Year Paid Corporate Internships
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setRoute('private-unis')}
+              className="w-full py-2.5 px-4 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+            >
+              <span>Explore Private & Foreign Hub →</span>
+            </button>
+          </article>
+        </div>
+      </section>
+
+      {/* ========================================================
+          CURATED OFFERINGS FOR ACTIVE DISTRICT
+         ======================================================== */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-200 pb-3">
+          <div>
+            <span className="text-xs font-extrabold text-amber-700 uppercase tracking-wider">
+              District Quota Matrix ({district.district_name})
+            </span>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">
+              Top Tracked UGC Degrees in {studentStream === 'ALL' ? 'All Streams' : studentStream}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600">
+              Published 2024/2025 cutoff Z-scores calculated specifically for {district.district_name} candidates.
+            </p>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setRoute('predictor')}
+            className="px-4 py-2 rounded-xl bg-[var(--primitive-obsidian-900)] text-white text-xs sm:text-sm font-bold hover:bg-slate-800 shrink-0 self-start sm:self-auto"
+          >
+            Open Full Finder ({districtPrograms.length} Offerings) →
+          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {quickMatches.map((program) => (
-            <ProgramChanceCard key={program.uni_code} program={program} />
+            <ProgramChanceCard key={program.uni_code} program={program} studentZ={studentZScore} />
           ))}
         </div>
       </section>

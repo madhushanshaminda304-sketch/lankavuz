@@ -15,6 +15,7 @@ import {
 } from './components/ProfileAndCalendarView';
 import { WelcomeSplashModal } from './components/WelcomeSplashModal';
 import { PrivateUniversitiesView } from './components/PrivateUniversitiesView';
+import { FloatingActionDock } from './components/FloatingActionDock';
 
 const AppRouterContent: React.FC = () => {
   const { route, district, setRoute, isWelcomeOpen, setIsWelcomeOpen } = useApp();
@@ -53,10 +54,11 @@ const AppRouterContent: React.FC = () => {
       </main>
 
       <PreferenceSimulatorDrawer />
+      <FloatingActionDock />
       <WelcomeSplashModal isOpen={isWelcomeOpen} onClose={() => setIsWelcomeOpen(false)} />
 
       {/* Authoritative Footer */}
-      <footer className="bg-[var(--color-brand-primary)] text-slate-300 border-t border-slate-800 py-10 px-4 sm:px-6 lg:px-8 no-print">
+      <footer className="bg-[var(--primitive-obsidian-900)] text-slate-300 border-t border-slate-800 py-10 px-4 sm:px-6 lg:px-8 no-print">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-xs">
           <div className="space-y-2">
             <div className="font-extrabold text-base text-white">
