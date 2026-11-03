@@ -17,10 +17,12 @@ import {
 } from 'lucide-react';
 import { useApp, type ActiveRoute } from '../context/AppContext';
 import { toast } from 'sonner';
-import { SUPPORTED_LANGUAGES, getLocalizedDistrictName, type LanguageCode } from '../lib/i18n';
+import { useTranslation } from 'react-i18next';
+import { SUPPORTED_LANGUAGES, getLocalizedDistrictName, normalizeLangCode, type LanguageCode } from '../lib/i18n';
 import { SRI_LANKA_DISTRICTS, UGC_INSTITUTIONS, NON_STATE_IFSLS_PATHWAYS } from '../data/sriLankaUgcSnapshot';
 
 export const GlobalHeader: React.FC = () => {
+  const { t: translate } = useTranslation();
   const {
     district,
     setDistrictId,
@@ -238,32 +240,35 @@ export const GlobalHeader: React.FC = () => {
               aria-label="Language selector"
               className="inline-flex rounded-lg bg-slate-950/80 p-0.5 border border-slate-800 text-[11px] font-bold shrink-0"
             >
-              {SUPPORTED_LANGUAGES.map((l) => (
-                <button
-                  key={l.code}
-                  type="button"
-                  onClick={() => {
-                    setLang(l.code);
-                    toast.success(
-                      l.code === 'SI'
-                        ? 'භාෂාව සාර්ථකව සිංහලට මාරු කරන ලදී'
-                        : l.code === 'TA'
-                        ? 'மொழி வெற்றிகரமாக தமிழுக்கு மாற்றப்பட்டது'
-                        : 'Language switched to English',
-                      { duration: 2500 }
-                    );
-                  }}
-                  title={l.nativeName}
-                  aria-pressed={lang === l.code}
-                  className={`px-2 py-1 rounded transition-all cursor-pointer ${
-                    lang === l.code
-                      ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-                  }`}
-                >
-                  {l.label}
-                </button>
-              ))}
+              {SUPPORTED_LANGUAGES.map((l) => {
+                const isActive = normalizeLangCode(lang) === l.code;
+                return (
+                  <button
+                    key={l.code}
+                    type="button"
+                    onClick={() => {
+                      setLang(l.upper);
+                      toast.success(
+                        l.code === 'si'
+                          ? 'භාෂාව සාර්ථකව සිංහලට මාරු කරන ලදී'
+                          : l.code === 'ta'
+                          ? 'மொழி வெற்றிகரமாக தமிழுக்கு மாற்றப்பட்டது'
+                          : 'Language switched to English',
+                        { duration: 2500 }
+                      );
+                    }}
+                    title={l.nativeName}
+                    aria-pressed={isActive}
+                    className={`px-2 py-1 rounded transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    }`}
+                  >
+                    {l.label}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Quick Setup Modal Replay */}

@@ -1,0 +1,77 @@
+{
+  "brand": {
+    "name": "LankaVuz",
+    "subtitle": "Sri Lanka UGC & Degree Atlas"
+  },
+  "nav": {
+    "predictor": "Course & Cutoff Finder",
+    "predictorShort": "Cutoffs",
+    "plan": "My UGC Plan",
+    "planShort": "My Plan",
+    "campuses": "Universities & Hubs",
+    "campusesShort": "Campuses",
+    "careers": "Career Compass & ROI",
+    "careersShort": "Careers & ROI",
+    "compare": "4-Way Degree Compare",
+    "calendar": "Admissions Calendar",
+    "search": "Search",
+    "searchPlaceholder": "Search code, degree, campus...",
+    "setup": "Setup"
+  },
+  "hero": {
+    "title": "Official 25-District Sri Lanka UGC Z-Score Cutoff Atlas",
+    "subtitle": "Zero-prediction, 100% factual cutoff matching across 21 State UGC Universities, MOHE Interest-Free Student Loans (IFSLS), and Direct Private / Foreign Degree Pathways.",
+    "tag": "Official 25-District UGC Z-Score Cutoff Atlas, 3-Subject A/L Matcher, Preference Order Simulator & MOHE Interest-Free Loan Bridge.",
+    "cta": "Open Course & Cutoff Finder →",
+    "badgeVerified": "Official 2024/2025 Academic Cutoff Data Verified",
+    "quickCheck": "3-Input Strategy Quick-Check",
+    "selectDistrict": "1. Quota District",
+    "selectStream": "2. A/L Stream",
+    "enterZ": "3. Official Z-Score",
+    "calculate": "Check Eligible Cutoffs →"
+  },
+  "finder": {
+    "title": "Course & 2024/25 Cutoff Finder",
+    "searchPlaceholder": "Search uni_code (001A, 008G), Medicine, CS, UOM...",
+    "quickPresets": "Quick Presets",
+    "allFreeState": "🏛️ All Free State UGC Degrees",
+    "moheLoan": "💰 LKR 0 Upfront (MOHE Loan)",
+    "computing": "💻 Computing & Software Eng",
+    "engineering": "⚙️ Engineering & QS",
+    "medicine": "🩺 Medicine & Allied Health",
+    "pendingAl": "⚡ Pending A/L or Post O/L",
+    "directEntry": "⚡ Direct Entry (No Aptitude Test)",
+    "weekendOnline": "🌐 Weekend / Distance Learning",
+    "activeQuota": "Active Quota"
+  },
+  "plan": {
+    "title": "My UGC Admission Plan & Preference Conflict Auditor",
+    "drawerTitle": "My UGC Admission Plan",
+    "autoOptimize": "Auto-Optimize by Cutoff",
+    "printSchedule": "Print Official Preference Sheet",
+    "share": "Share",
+    "inPlan": "In Plan",
+    "addToPlan": "Add to Plan",
+    "removeFromPlan": "Remove"
+  },
+  "compare": {
+    "dockComparing": "Comparing",
+    "compareSpecSheet": "Compare Spec Sheet"
+  },
+  "districtModal": {
+    "title": "Select Your G.C.E. A/L Quota District",
+    "subtitle": "UGC applies 40% Merit + 55% District Quota + 5% Underprivileged quota formulas.",
+    "searchPlaceholder": "Search district name (e.g. Colombo, Kandy, යාපනය, யாழ்ப்பாணம்)..."
+  },
+  "toast": {
+    "langSwitched": "Language switched to English"
+  },
+  "common": {
+    "change": "Change",
+    "close": "Close",
+    "done": "Done",
+    "details": "Details",
+    "reset": "Reset",
+    "activeQuotaDistrict": "Active Quota District"
+  }
+}

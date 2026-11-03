@@ -9,9 +9,10 @@ import {
   optimizePreferenceOrder,
   type PreferencePlanItem,
 } from '../lib/ugcLogic';
-import {
+import i18n, {
   I18N_DICT,
   isValidLanguageCode,
+  normalizeLangCode,
   type LanguageCode,
 } from '../lib/i18n';
 
@@ -93,7 +94,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [lang, setLangState] = useState<LanguageCode>(() => {
     try {
       const saved = localStorage.getItem('lankavuz_lang');
-      if (saved && isValidLanguageCode(saved)) return saved;
+      if (saved && isValidLanguageCode(saved)) return (normalizeLangCode(saved).toUpperCase() as LanguageCode);
     } catch {
       // Ignore storage error
     }
@@ -101,12 +102,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const setLang = useCallback((newLang: LanguageCode) => {
-    setLangState(newLang);
-    try {
-      localStorage.setItem('lankavuz_lang', newLang);
-    } catch {
-      // Ignore storage error
-    }
+    const norm = normalizeLangCode(newLang);
+    setLangState(norm.toUpperCase() as LanguageCode);
+    i18n.changeLanguage(norm);
+  }, []);
+
+  useEffect(() => {
+    const handleLngChanged = (lng: string) => {
+      const upper = normalizeLangCode(lng).toUpperCase() as LanguageCode;
+      setLangState(upper);
+    };
+    i18n.on('languageChanged', handleLngChanged);
+    return () => {
+      i18n.off('languageChanged', handleLngChanged);
+    };
   }, []);
 
   useEffect(() => {
@@ -309,7 +318,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsDistrictModalOpen,
         lang,
         setLang,
-        t: I18N_DICT[lang],
+        t: I18N_DICT[(normalizeLangCode(lang).toUpperCase() as 'EN' | 'SI' | 'TA')] || I18N_DICT.EN,
         route,
         setRoute,
         selectedInstitutionCode,
