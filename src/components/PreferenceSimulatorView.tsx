@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { auditPreferenceOrder, type PreferencePlanItem } from '../lib/ugcLogic';
+import { getLocalizedDistrictName } from '../lib/i18n';
 
 export const PreferenceSimulatorContent: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const {
@@ -32,6 +33,8 @@ export const PreferenceSimulatorContent: React.FC<{ compact?: boolean }> = ({ co
     toggleLockPlanItem,
     autoOptimizePlan,
     openCourseProfile,
+    t,
+    lang,
   } = useApp();
 
   const resolvedList = useMemo(() => {
@@ -122,7 +125,7 @@ export const PreferenceSimulatorContent: React.FC<{ compact?: boolean }> = ({ co
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs shadow-md interactive-surface"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Auto-Optimize by Cutoff</span>
+            <span>{t.autoOptimize || "Auto-Optimize by Cutoff"}</span>
           </button>
 
           <button
@@ -131,7 +134,7 @@ export const PreferenceSimulatorContent: React.FC<{ compact?: boolean }> = ({ co
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold border border-slate-700 interactive-surface"
           >
             <Printer className="w-3.5 h-3.5 text-amber-400" />
-            <span>Print Official Preference Sheet</span>
+            <span>{t.printSchedule || "Print Official Preference Sheet"}</span>
           </button>
 
           <button
@@ -386,6 +389,7 @@ export const PreferenceSimulatorContent: React.FC<{ compact?: boolean }> = ({ co
 };
 
 export const PreferenceSimulatorView: React.FC = () => {
+  const { t } = useApp();
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 pb-24">
       <div className="no-print">
@@ -393,7 +397,7 @@ export const PreferenceSimulatorView: React.FC = () => {
           Official Sri Lanka UGC Preference Order Simulator
         </span>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
-          My UGC Admission Plan & Preference Conflict Auditor
+          {t.myPlan}
         </h1>
         <p className="text-sm text-slate-600 mt-1 max-w-2xl">
           Order your <code className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">uni_code</code> choices before submitting on <code className="font-mono">admission.ugc.ac.lk</code>. Instant conflict detection protects you from locking out higher-cutoff choices.
@@ -406,7 +410,7 @@ export const PreferenceSimulatorView: React.FC = () => {
 };
 
 export const PreferenceSimulatorDrawer: React.FC = () => {
-  const { isPlanDrawerOpen, setIsPlanDrawerOpen, setRoute } = useApp();
+  const { isPlanDrawerOpen, setIsPlanDrawerOpen, setRoute, t } = useApp();
 
   if (!isPlanDrawerOpen) return null;
 
@@ -421,7 +425,7 @@ export const PreferenceSimulatorDrawer: React.FC = () => {
         <div className="px-5 py-4 bg-[var(--primitive-obsidian-900)] text-white flex items-center justify-between">
           <div>
             <h2 id="plan-drawer-title" className="text-base sm:text-lg font-extrabold">
-              My UGC Admission Plan
+              {t.myPlan}
             </h2>
             <p className="text-xs text-slate-300">
               Reorder your uni_code sequence or click Auto-Optimize to fix cutoff conflicts.

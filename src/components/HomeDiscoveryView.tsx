@@ -16,6 +16,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { getLocalizedDistrictName } from '../lib/i18n';
 import {
   SRI_LANKA_DISTRICTS,
   UGC_COURSES,
@@ -31,6 +32,7 @@ export const HomeDiscoveryView: React.FC = () => {
     setIsDistrictModalOpen,
     districtPrograms,
     t,
+    lang,
     studentZScore,
     setStudentZScore,
     studentStream,
@@ -81,14 +83,14 @@ export const HomeDiscoveryView: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-700/80 text-xs text-amber-300">
               <MapPin className="w-3.5 h-3.5 text-amber-400" />
               <span>
-                Active Quota District: <strong>{district.district_name}</strong> (#{district.district_id})
+                {t.quotaBadge}: <strong>{getLocalizedDistrictName(district, lang)}</strong> (#{district.district_id})
               </span>
               <button
                 type="button"
                 onClick={() => setIsDistrictModalOpen(true)}
                 className="underline hover:text-white ml-1 font-bold text-amber-200"
               >
-                Change
+                {t.changeDistrict}
               </button>
             </div>
 
@@ -128,7 +130,7 @@ export const HomeDiscoveryView: React.FC = () => {
               >
                 {SRI_LANKA_DISTRICTS.map((d) => (
                   <option key={d.district_id} value={d.district_id}>
-                    {d.district_id}. {d.district_name}
+                    {d.district_id}. {getLocalizedDistrictName(d, lang)}
                   </option>
                 ))}
               </select>

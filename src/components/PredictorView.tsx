@@ -28,6 +28,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { getLocalizedDistrictName } from '../lib/i18n';
 import {
   SRI_LANKA_DISTRICTS,
   NON_STATE_IFSLS_PATHWAYS,
@@ -306,6 +307,8 @@ export const PredictorView: React.FC = () => {
     toggleCompare,
     openCourseProfile,
     openInstitutionProfile,
+    t,
+    lang,
   } = useApp();
 
   // Search & Presets
@@ -817,10 +820,10 @@ export const PredictorView: React.FC = () => {
             Official Sri Lanka UGC Admissions & Higher Education Engine
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
-            Course & 2024/25 Cutoff Finder
+            {t.navPredictor}
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-3xl leading-relaxed">
-            Zero-prediction, 100% factual cutoff explorer. Compare your official G.C.E. A/L Z-score directly against 2024/2025 published cutoffs across 21 State UGC Universities, MOHE 0% Interest Loans (IFSLS), and Direct Private / Foreign Degrees.
+            {t.heroSub}
           </p>
         </div>
 
@@ -830,7 +833,7 @@ export const PredictorView: React.FC = () => {
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--color-brand-primary)] text-white text-xs sm:text-sm font-bold self-start md:self-auto shrink-0 shadow-xs hover:bg-slate-800 transition-colors"
         >
           <MapPin className="w-4 h-4 text-amber-400" />
-          <span>Active Quota: {district.district_name} (#{district.district_id})</span>
+          <span>{t.quotaBadge}: {getLocalizedDistrictName(district, lang)} (#{district.district_id})</span>
         </button>
       </div>
 
@@ -845,7 +848,7 @@ export const PredictorView: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by uni_code (008G, 012T), Degree (MBBS, AI, Law, QS), Campus (UOM, SLIIT, UCSC), or Hub..."
+            placeholder={t.searchPlaceholder}
             className="w-full pl-12 pr-10 py-3 rounded-xl border border-slate-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 text-sm font-medium outline-hidden"
           />
           {searchQuery && (
@@ -862,7 +865,7 @@ export const PredictorView: React.FC = () => {
         {/* 8 One-Click Quick Preset Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold scrollbar-thin">
           <span className="text-slate-500 uppercase tracking-wider text-[11px] shrink-0 font-extrabold flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Quick Presets:
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" /> {t.quickPresets}:
           </span>
 
           <button
@@ -874,7 +877,7 @@ export const PredictorView: React.FC = () => {
                 : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
             }`}
           >
-            🏛️ All Free State UGC Degrees
+            {t.allFreeStateUgcs}
           </button>
 
           <button

@@ -10,6 +10,7 @@ export const FloatingActionDock: React.FC = () => {
     setIsPlanDrawerOpen,
     setRoute,
     route,
+    t,
   } = useApp();
 
   const hasCompare = compareList.length > 0;
@@ -41,7 +42,7 @@ export const FloatingActionDock: React.FC = () => {
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition-colors shrink-0"
             >
               <ListChecks className="w-4 h-4 text-amber-400" />
-              <span>My Plan</span>
+              <span>{t.myPlanShort}</span>
               <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-950 font-mono text-[11px]">
                 {planEntries.length}
               </span>
@@ -55,7 +56,7 @@ export const FloatingActionDock: React.FC = () => {
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-sky-500/20 border border-sky-400/40 text-sky-300 text-xs font-bold hover:bg-sky-500/30 transition-colors shrink-0"
             >
               <Scale className="w-4 h-4 text-sky-400" />
-              <span>Comparing</span>
+              <span>{t.comparing}</span>
               <span className="px-1.5 py-0.2 rounded-full bg-sky-500 text-slate-950 font-mono text-[11px]">
                 {compareList.length}
               </span>
@@ -71,7 +72,7 @@ export const FloatingActionDock: React.FC = () => {
               onClick={() => setRoute('compare')}
               className="px-3.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition-colors"
             >
-              <span>Compare Spec Sheet</span>
+              <span>{t.compare}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           )}

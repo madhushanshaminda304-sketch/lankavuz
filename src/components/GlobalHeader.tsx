@@ -15,7 +15,9 @@ import {
   Layers,
   ArrowRight,
 } from 'lucide-react';
-import { useApp, type LanguageCode, type ActiveRoute } from '../context/AppContext';
+import { useApp, type ActiveRoute } from '../context/AppContext';
+import { toast } from 'sonner';
+import { SUPPORTED_LANGUAGES, getLocalizedDistrictName, type LanguageCode } from '../lib/i18n';
 import { SRI_LANKA_DISTRICTS, UGC_INSTITUTIONS, NON_STATE_IFSLS_PATHWAYS } from '../data/sriLankaUgcSnapshot';
 
 export const GlobalHeader: React.FC = () => {
@@ -121,23 +123,23 @@ export const GlobalHeader: React.FC = () => {
   const navItems: { id: ActiveRoute; label: string; icon: React.ReactNode; badge?: number }[] = [
     {
       id: 'predictor',
-      label: '🧭 Course & Cutoff Finder',
+      label: `🧭 ${t.navPredictor}`,
       icon: <Search className="w-3.5 h-3.5" />,
     },
     {
       id: 'my-plan',
-      label: '📋 My UGC Plan',
+      label: `📋 ${t.myPlan}`,
       icon: <ListChecks className="w-3.5 h-3.5" />,
       badge: planEntries.length,
     },
     {
       id: 'private-unis',
-      label: '🏛️ Universities & Hubs',
+      label: `🏛️ ${t.navPrivateUnis}`,
       icon: <Building2 className="w-3.5 h-3.5" />,
     },
     {
       id: 'careers',
-      label: '💡 Career Compass & ROI',
+      label: `💡 ${t.navCareers}`,
       icon: <Compass className="w-3.5 h-3.5" />,
     },
   ];
@@ -162,7 +164,7 @@ export const GlobalHeader: React.FC = () => {
                   Lanka<span className="text-amber-400">Vuz</span>
                 </span>
                 <span className="text-[11px] text-slate-400 hidden sm:block leading-tight font-medium">
-                  Sri Lanka UGC & Degree Atlas
+                  {t.brandSubtitle}
                 </span>
               </div>
             </button>
@@ -175,7 +177,7 @@ export const GlobalHeader: React.FC = () => {
               title="Change G.C.E. A/L Quota District"
             >
               <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span className="truncate max-w-[120px]">{district.district_name}</span>
+              <span className="truncate max-w-[120px] font-bold">{getLocalizedDistrictName(district, lang)}</span>
               <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-tabular text-[11px]">
                 #{district.district_id}
               </span>
@@ -223,31 +225,43 @@ export const GlobalHeader: React.FC = () => {
               title="Search uni_codes, courses & campuses (⌘K / Ctrl+K)"
             >
               <Search className="w-3.5 h-3.5 text-slate-400" />
-              <span className="hidden xl:inline text-slate-400">Search code, degree, campus...</span>
-              <span className="xl:hidden">Search</span>
+              <span className="hidden xl:inline text-slate-400">{t.searchNavPlaceholder}</span>
+              <span className="xl:hidden">{t.search}</span>
               <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono text-slate-400 font-bold">
                 <Command className="w-2.5 h-2.5" /> K
               </kbd>
             </button>
 
-            {/* Language Switcher */}
+            {/* Language Switcher (Always visible on mobile & desktop) */}
             <div
               role="group"
               aria-label="Language selector"
-              className="hidden sm:inline-flex rounded-lg bg-slate-950/70 p-0.5 border border-slate-800 text-[11px] font-bold"
+              className="inline-flex rounded-lg bg-slate-950/80 p-0.5 border border-slate-800 text-[11px] font-bold shrink-0"
             >
-              {(['EN', 'SI', 'TA'] as LanguageCode[]).map((l) => (
+              {SUPPORTED_LANGUAGES.map((l) => (
                 <button
-                  key={l}
+                  key={l.code}
                   type="button"
-                  onClick={() => setLang(l)}
-                  className={`px-2 py-1 rounded transition-colors ${
-                    lang === l
-                      ? 'bg-amber-500 text-slate-950 font-extrabold'
-                      : 'text-slate-400 hover:text-white'
+                  onClick={() => {
+                    setLang(l.code);
+                    toast.success(
+                      l.code === 'SI'
+                        ? 'භාෂාව සාර්ථකව සිංහලට මාරු කරන ලදී'
+                        : l.code === 'TA'
+                        ? 'மொழி வெற்றிகரமாக தமிழுக்கு மாற்றப்பட்டது'
+                        : 'Language switched to English',
+                      { duration: 2500 }
+                    );
+                  }}
+                  title={l.nativeName}
+                  aria-pressed={lang === l.code}
+                  className={`px-2 py-1 rounded transition-all cursor-pointer ${
+                    lang === l.code
+                      ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
                   }`}
                 >
-                  {l}
+                  {l.label}
                 </button>
               ))}
             </div>
@@ -260,7 +274,7 @@ export const GlobalHeader: React.FC = () => {
               className="hidden md:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-amber-300 text-xs font-semibold interactive-surface"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Setup</span>
+              <span>{t.setup}</span>
             </button>
 
             {/* "My Plan" Counter Drawer Toggle */}
@@ -270,7 +284,7 @@ export const GlobalHeader: React.FC = () => {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs shadow-sm interactive-surface"
             >
               <ListChecks className="w-4 h-4" />
-              <span className="hidden sm:inline">My Plan</span>
+              <span className="hidden sm:inline">{t.myPlanShort}</span>
               <span className="px-1.5 py-0.5 rounded-full bg-slate-950 text-amber-300 font-tabular text-xs">
                 {planEntries.length}
               </span>
@@ -292,7 +306,7 @@ export const GlobalHeader: React.FC = () => {
           }`}
         >
           <Search className="w-4 h-4" />
-          <span>Cutoffs</span>
+          <span>{t.navPredictorShort}</span>
         </button>
         <button
           type="button"
@@ -302,7 +316,7 @@ export const GlobalHeader: React.FC = () => {
           }`}
         >
           <ListChecks className="w-4 h-4" />
-          <span>My Plan ({planEntries.length})</span>
+          <span>{t.myPlanShort} ({planEntries.length})</span>
         </button>
         <button
           type="button"
@@ -312,7 +326,7 @@ export const GlobalHeader: React.FC = () => {
           }`}
         >
           <Building2 className="w-4 h-4" />
-          <span>Campuses</span>
+          <span>{t.navPrivateUnisShort}</span>
         </button>
         <button
           type="button"
@@ -322,7 +336,7 @@ export const GlobalHeader: React.FC = () => {
           }`}
         >
           <Compass className="w-4 h-4" />
-          <span>Careers & ROI</span>
+          <span>{t.navCareersShort}</span>
         </button>
       </nav>
 
@@ -481,7 +495,7 @@ export const GlobalHeader: React.FC = () => {
               <div>
                 <h2 className="text-lg font-extrabold flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-amber-600" />
-                  <span>Select Your G.C.E. A/L Quota District</span>
+                  <span>{t.districtModalTitle}</span>
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
                   UGC applies 40% Merit + 55% District Quota + 5% Underprivileged quota formulas.
@@ -501,7 +515,7 @@ export const GlobalHeader: React.FC = () => {
               type="text"
               value={districtFilter}
               onChange={(e) => setDistrictFilter(e.target.value)}
-              placeholder="Search district name (e.g. Colombo, Kandy, යාපනය, யாழ்ப்பாணம்)..."
+              placeholder={t.districtSearchPlaceholder}
               className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold focus:border-amber-500 outline-hidden"
             />
 

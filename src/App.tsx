@@ -16,6 +16,7 @@ import {
 import { WelcomeSplashModal } from './components/WelcomeSplashModal';
 import { PrivateUniversitiesView } from './components/PrivateUniversitiesView';
 import { FloatingActionDock } from './components/FloatingActionDock';
+import { Toaster } from 'sonner';
 
 const AppRouterContent: React.FC = () => {
   const { route, district, setRoute, isWelcomeOpen, setIsWelcomeOpen } = useApp();
@@ -56,6 +57,7 @@ const AppRouterContent: React.FC = () => {
       <PreferenceSimulatorDrawer />
       <FloatingActionDock />
       <WelcomeSplashModal isOpen={isWelcomeOpen} onClose={() => setIsWelcomeOpen(false)} />
+      <Toaster richColors position="top-center" />
 
       {/* Authoritative Footer */}
       <footer className="bg-[var(--primitive-obsidian-900)] text-slate-300 border-t border-slate-800 py-10 px-4 sm:px-6 lg:px-8 no-print">
