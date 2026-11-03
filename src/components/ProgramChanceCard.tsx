@@ -12,10 +12,9 @@ const MEDIUM_LABELS: Record<string, string> = {
 
 export const ProgramChanceCard: React.FC<{
   program: ProgramCutoffViewRow;
-  studentZ?: number;
+  studentZ?: number | null;
 }> = ({ program, studentZ }) => {
   const {
-    studentZScore,
     planEntries,
     addToPlan,
     removeFromPlan,
@@ -25,9 +24,8 @@ export const ProgramChanceCard: React.FC<{
     openInstitutionProfile,
   } = useApp();
 
-  const effectiveStudentZ = studentZ ?? studentZScore;
   const match = classifyProgramMatch({
-    studentZ: effectiveStudentZ,
+    studentZ: studentZ ?? null,
     minZScore: program.min_z_score,
     status: program.status,
     allIslandMeritOnly: program.all_island_merit_only,
@@ -37,54 +35,35 @@ export const ProgramChanceCard: React.FC<{
   const isInPlan = planEntries.some((p) => p.uni_code === program.uni_code);
   const isInCompare = compareList.includes(program.uni_code);
 
-  const tierBadge = () => {
-    switch (match.tier) {
-      case 'SAFE':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
-            🟢 Safe Match ({match.margin !== null && match.margin >= 0 ? `+${match.margin.toFixed(4)}` : ''})
-          </span>
-        );
-      case 'TARGET':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
-            🟡 Target Match ({match.margin !== null ? (match.margin >= 0 ? `+${match.margin.toFixed(4)}` : match.margin.toFixed(4)) : ''})
-          </span>
-        );
-      case 'REACH':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-900 border border-rose-300">
-            🔴 Reach / Dream ({match.margin !== null ? match.margin.toFixed(4) : ''})
-          </span>
-        );
-      case 'NQC':
-        return (
-          <span
-            title="No candidates from your district met the minimum threshold or all quota seats were filled in the previous intake — check All-Island Merit and historical years."
-            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-800 border border-slate-300 cursor-help"
-          >
-            ⚪ NQC (Not Qualified Candidates)
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-300">
-            High Cutoff ({match.margin !== null ? match.margin.toFixed(4) : ''})
-          </span>
-        );
+  const cutoffBadge = () => {
+    if (program.status === 'NQC' || match.effectiveCutoff === null) {
+      return (
+        <span
+          title="No candidates from your district met the minimum threshold or all quota seats were filled in the previous intake — check All-Island Merit and historical years."
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300 cursor-help font-tabular"
+        >
+          ⚪ 2024/25 Cutoff: NQC
+        </span>
+      );
     }
+    if (program.all_island_merit_only) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-sky-50 text-sky-950 border border-sky-300 font-tabular">
+          🌐 All-Island Cutoff: {match.effectiveCutoff.toFixed(4)}
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-50 text-amber-950 border border-amber-300 font-tabular">
+        📊 {program.district_name} 2024/25 Cutoff: {match.effectiveCutoff.toFixed(4)}
+      </span>
+    );
   };
-
-  // Compute progress percentage for visual Z-Score delta bar
-  const barPercent =
-    match.effectiveCutoff !== null
-      ? Math.max(12, Math.min(100, Math.round(((effectiveStudentZ + 0.5) / (match.effectiveCutoff + 0.6)) * 100)))
-      : 50;
 
   return (
     <article className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-xs hover:border-slate-300 flex flex-col justify-between gap-4">
       <div>
-        {/* Top Row: uni_code badge + Stream + Tier Badge */}
+        {/* Top Row: uni_code badge + Stream + Factual Cutoff Badge */}
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
           <div className="flex items-center gap-2">
             <button
@@ -98,7 +77,7 @@ export const ProgramChanceCard: React.FC<{
               {program.stream}
             </span>
           </div>
-          {tierBadge()}
+          {cutoffBadge()}
         </div>
 
         {/* Title & Institution */}
@@ -152,40 +131,31 @@ export const ProgramChanceCard: React.FC<{
             )}
             {program.status === 'NQC' && (
               <span className="text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                ℹ️ NQC in {program.district_name}: No candidates from this district met the minimum threshold or all quota seats were filled in the previous intake.
+                ℹ️ NQC in {program.district_name}: No candidates met the quota cutoff in 2024/25.
               </span>
             )}
           </div>
         )}
 
-        {/* Z-Score vs District Cutoff Visual Delta Bar */}
-        <div className="mt-3.5 p-3 rounded-lg bg-slate-50 border border-slate-200/80">
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-tabular">
-            <span className="font-semibold text-slate-700">
-              Your Z: <strong className="text-slate-950">{effectiveStudentZ.toFixed(4)}</strong>
-            </span>
-            <span className="font-semibold text-slate-700">
-              {program.all_island_merit_only ? 'All-Island Cutoff' : `${program.district_name} Cutoff`}:{' '}
-              <strong className="text-slate-950">
-                {match.effectiveCutoff !== null ? match.effectiveCutoff.toFixed(4) : 'NQC (NULL)'}
-              </strong>
-            </span>
+        {/* Factual Comparison Box (if student entered a Z-score) */}
+        {studentZ !== undefined && studentZ !== null && match.effectiveCutoff !== null && (
+          <div className="mt-3.5 p-3 rounded-lg bg-slate-50 border border-slate-200/80 space-y-1 text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2 font-tabular">
+              <span className="font-semibold text-slate-700">
+                Your Z: <strong className="text-slate-950">{studentZ.toFixed(4)}</strong>
+              </span>
+              <span className="font-bold text-slate-900">
+                Diff vs 2024/25: {' '}
+                <span className={match.margin !== null && match.margin >= 0 ? 'text-emerald-700' : 'text-amber-700'}>
+                  {match.margin !== null && match.margin >= 0 ? `+${match.margin.toFixed(4)}` : match.margin?.toFixed(4)}
+                </span>
+              </span>
+            </div>
+            <p className="text-[10px] text-slate-500 italic">
+              Historical 2024/2025 UGC cutoff for reference only; official cutoffs vary each admission year.
+            </p>
           </div>
-          <div className="w-full h-2 rounded-full bg-slate-200 mt-2 overflow-hidden">
-            <div
-              style={{ width: `${barPercent}%` }}
-              className={`h-full rounded-full ${
-                match.tier === 'SAFE'
-                  ? 'bg-emerald-600'
-                  : match.tier === 'TARGET'
-                  ? 'bg-amber-500'
-                  : match.tier === 'REACH'
-                  ? 'bg-rose-600'
-                  : 'bg-slate-500'
-              }`}
-            />
-          </div>
-        </div>
+        )}
 
         {/* Metadata Pills: Medium, Duration, Proposed Intake */}
         <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-slate-700">

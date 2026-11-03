@@ -24,33 +24,39 @@ describe('ugcLogic — Sri Lankan UGC Z-Score & Preference Order Engine', () => 
     expect(result.margin).toBeNull();
   });
 
-  it('classifies SAFE (>= +0.0500), TARGET (-0.0500 to +0.0499), and REACH (-0.2000 to -0.0501) accurately', () => {
-    const safe = classifyProgramMatch({
+  it('performs factual cutoff comparison (ABOVE_LAST_CUTOFF, BELOW_LAST_CUTOFF, CUTOFF_ONLY) with zero probability guessing', () => {
+    // 1. Student Z is above last cutoff
+    const above = classifyProgramMatch({
       studentZ: 1.52,
       minZScore: 1.4125,
       status: 'QUALIFIED',
       allIslandMeritOnly: false,
     });
-    expect(safe.tier).toBe('SAFE');
-    expect(safe.margin).toBeCloseTo(0.1075, 4);
+    expect(above.tier).toBe('ABOVE_LAST_CUTOFF');
+    expect(above.margin).toBeCloseTo(0.1075, 4);
+    expect(above.label).toContain('Your Z: +0.1075');
 
-    const target = classifyProgramMatch({
+    // 2. Student Z is below last cutoff
+    const below = classifyProgramMatch({
       studentZ: 1.4,
       minZScore: 1.425,
       status: 'QUALIFIED',
       allIslandMeritOnly: false,
     });
-    expect(target.tier).toBe('TARGET');
-    expect(target.margin).toBeCloseTo(-0.025, 4);
+    expect(below.tier).toBe('BELOW_LAST_CUTOFF');
+    expect(below.margin).toBeCloseTo(-0.025, 4);
+    expect(below.label).toContain('Your Z: -0.0250');
 
-    const reach = classifyProgramMatch({
-      studentZ: 1.3,
+    // 3. Cutoff only (no student Z supplied)
+    const cutoffOnly = classifyProgramMatch({
+      studentZ: null,
       minZScore: 1.45,
       status: 'QUALIFIED',
       allIslandMeritOnly: false,
     });
-    expect(reach.tier).toBe('REACH');
-    expect(reach.margin).toBeCloseTo(-0.15, 4);
+    expect(cutoffOnly.tier).toBe('CUTOFF_ONLY');
+    expect(cutoffOnly.margin).toBeNull();
+    expect(cutoffOnly.effectiveCutoff).toBe(1.45);
   });
 
   it('detects Preference Order Conflicts when a lower-cutoff safety course is placed above a higher-cutoff dream course', () => {

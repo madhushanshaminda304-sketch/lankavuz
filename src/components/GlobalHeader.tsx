@@ -31,7 +31,6 @@ export const GlobalHeader: React.FC = () => {
     planEntries,
     setIsPlanDrawerOpen,
     compareList,
-    setIsCafDrawerOpen,
     openInstitutionProfile,
     openCourseProfile,
     setIsWelcomeOpen,
@@ -239,7 +238,7 @@ export const GlobalHeader: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => setIsCafDrawerOpen(true)}
+              onClick={() => setRoute('private-unis')}
               className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-amber-500/40 text-amber-300 text-xs font-semibold interactive-surface"
             >
               <Sparkles className="w-3.5 h-3.5" />

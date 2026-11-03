@@ -45,7 +45,6 @@ export const HomeDiscoveryView: React.FC = () => {
     setRoute,
     openInstitutionProfile,
     openCourseProfile,
-    setIsCafDrawerOpen,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<HeroTab>('zscore');
@@ -132,7 +131,7 @@ export const HomeDiscoveryView: React.FC = () => {
                 }`}
               >
                 <Calculator className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>1. By Z-Score & A/L Subjects</span>
+                <span>1. Course & Cutoff Finder</span>
               </button>
 
               <button
@@ -223,7 +222,7 @@ export const HomeDiscoveryView: React.FC = () => {
 
                   <div>
                     <label htmlFor="hero-z-input" className="block text-xs font-bold text-slate-700 mb-1">
-                      Your Official or Expected Z-Score
+                      Your Official Z-Score (Optional Filter)
                     </label>
                     <input
                       id="hero-z-input"
@@ -243,7 +242,7 @@ export const HomeDiscoveryView: React.FC = () => {
                       onClick={() => setRoute('predictor')}
                       className="w-full px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 shadow-sm interactive-surface"
                     >
-                      <span>Check Safe / Target / Reach</span>
+                      <span>Open Advanced Course & Cutoff Finder →</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -497,11 +496,11 @@ export const HomeDiscoveryView: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => setIsCafDrawerOpen(true)}
+              onClick={() => setRoute('private-unis')}
               className="px-4 py-2 rounded-lg border border-amber-600 bg-amber-50 text-amber-950 text-xs sm:text-sm font-bold hover:bg-amber-100 inline-flex items-center gap-1.5"
             >
               <ShieldCheck className="w-4 h-4 text-amber-700" />
-              <span>IFSLS Loan Backups</span>
+              <span>Explore IFSLS Loan Backups →</span>
             </button>
           </div>
         </div>

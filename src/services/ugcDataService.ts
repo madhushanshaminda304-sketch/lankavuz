@@ -174,25 +174,16 @@ export async function matchEligibleProgramsRpc(params: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return data.map((r: any) => {
           const base = normalizeProgramCutoffRow(r);
-          let chanceTier: ChanceTier = 'TARGET';
-          if (r.chance_category) {
-            const cat = String(r.chance_category).toUpperCase();
-            if (cat === 'SAFE') chanceTier = 'SAFE';
-            else if (cat === 'REACH') chanceTier = 'REACH';
-            else if (cat === 'UNLIKELY') chanceTier = 'REACH';
-          } else {
-            const cl = classifyProgramMatch({
-              studentZ: p_student_z,
-              minZScore: base.min_z_score,
-              status: base.status,
-              allIslandMeritOnly: base.all_island_merit_only,
-            });
-            chanceTier = cl.tier;
-          }
+          const cl = classifyProgramMatch({
+            studentZ: p_student_z,
+            minZScore: base.min_z_score,
+            status: base.status,
+            allIslandMeritOnly: base.all_island_merit_only,
+          });
           return {
             ...base,
-            z_margin: r.z_margin !== undefined ? Number(r.z_margin) : (base.min_z_score !== null ? Number((p_student_z - base.min_z_score).toFixed(4)) : null),
-            chance_tier: chanceTier,
+            z_margin: cl.margin,
+            chance_tier: cl.tier,
           };
         });
       }

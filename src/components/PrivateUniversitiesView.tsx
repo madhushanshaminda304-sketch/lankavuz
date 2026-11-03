@@ -25,7 +25,7 @@ import {
 } from '../services/ugcDataService';
 
 export const PrivateUniversitiesView: React.FC = () => {
-  const { setRoute, setIsCafDrawerOpen, openCourseProfile } = useApp();
+  const { setRoute, openCourseProfile } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTier, setSelectedTier] = useState<'ALL' | HigherEdTier>('ALL');
@@ -379,14 +379,24 @@ export const PrivateUniversitiesView: React.FC = () => {
                   </a>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setIsCafDrawerOpen(true)}
-                  className="w-full py-2.5 rounded-xl bg-[var(--color-brand-primary)] hover:bg-slate-800 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
-                >
-                  <span>Apply / Request Scholarship Info (1-Click Form)</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  <a
+                    href={program.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-2 px-3 rounded-lg bg-[var(--color-brand-primary)] hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-xs transition-colors"
+                  >
+                    <span>Apply on {program.institute_abbr} Official Page ↗</span>
+                  </a>
+                  <a
+                    href={program.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-2 px-3 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center justify-center gap-1 transition-colors"
+                  >
+                    <span>Official Program Page ↗</span>
+                  </a>
+                </div>
               </div>
             </article>
           ))}

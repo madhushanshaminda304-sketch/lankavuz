@@ -41,7 +41,7 @@ const CAREER_CONFIGS: Record<CareerStream, CareerConfig> = {
 };
 
 export const DegreeRoiCalculator: React.FC = () => {
-  const { setIsCafDrawerOpen } = useApp();
+  const { setRoute } = useApp();
 
   const [living, setLiving] = useState<LivingArrangement>('hostel');
   const [career, setCareer] = useState<CareerStream>('it_software');
@@ -92,13 +92,14 @@ export const DegreeRoiCalculator: React.FC = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsCafDrawerOpen(true)}
-          className="px-4 py-2.5 rounded-lg bg-[var(--color-brand-primary)] hover:bg-slate-800 text-white text-xs font-bold self-start md:self-auto shrink-0 shadow-xs"
+        <a
+          href="https://studentloans.mohe.gov.lk/loan_application/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-4 py-2.5 rounded-lg bg-[var(--color-brand-primary)] hover:bg-slate-800 text-white text-xs font-bold self-start md:self-auto shrink-0 shadow-xs inline-flex items-center gap-1.5"
         >
-          Check IFSLS Loan Eligibility →
-        </button>
+          MOHE 0% Loan Portal ↗
+        </a>
       </div>
 
       {/* Interactive Controls */}

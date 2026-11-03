@@ -1,8 +1,12 @@
 export type ALGrade = 'A' | 'B' | 'C' | 'S' | 'F';
-export type ChanceTier = 'SAFE' | 'TARGET' | 'REACH' | 'OUT_OF_RANGE' | 'NQC';
+export type ChanceTier =
+  | 'ABOVE_LAST_CUTOFF'
+  | 'BELOW_LAST_CUTOFF'
+  | 'CUTOFF_ONLY'
+  | 'NQC';
 
 export interface ClassifyInput {
-  studentZ: number;
+  studentZ?: number | null;
   minZScore: number | null;
   status: 'QUALIFIED' | 'NQC';
   allIslandMeritOnly: boolean;
@@ -13,10 +17,13 @@ export interface ClassifyResult {
   tier: ChanceTier;
   margin: number | null;
   effectiveCutoff: number | null;
+  label: string;
+  description: string;
 }
 
 /**
- * Classifies a student's Z-score against a program's historical cutoff.
+ * Factual comparison of student's Z-score against official published UGC historical cutoffs.
+ * Zero prediction — purely factual comparison.
  * CRITICAL SRI LANKAN UGC RULE: Never treat NULL / NQC as 0.0000!
  */
 export function classifyProgramMatch(input: ClassifyInput): ClassifyResult {
@@ -29,21 +36,35 @@ export function classifyProgramMatch(input: ClassifyInput): ClassifyResult {
       tier: 'NQC',
       margin: null,
       effectiveCutoff: null,
+      label: '2024/25 Cutoff: NQC',
+      description: 'NQC in 2024/25 Intake (No quota cutoff established for this district)',
+    };
+  }
+
+  if (input.studentZ === undefined || input.studentZ === null) {
+    return {
+      tier: 'CUTOFF_ONLY',
+      margin: null,
+      effectiveCutoff,
+      label: `2024/25 Cutoff: ${effectiveCutoff.toFixed(4)}`,
+      description: `2024/2025 Published UGC District Cutoff: ${effectiveCutoff.toFixed(4)}`,
     };
   }
 
   const margin = Number((input.studentZ - effectiveCutoff).toFixed(4));
+  const isAbove = margin >= 0;
 
-  if (margin >= 0.05) {
-    return { tier: 'SAFE', margin, effectiveCutoff };
-  }
-  if (margin >= -0.05) {
-    return { tier: 'TARGET', margin, effectiveCutoff };
-  }
-  if (margin >= -0.2) {
-    return { tier: 'REACH', margin, effectiveCutoff };
-  }
-  return { tier: 'OUT_OF_RANGE', margin, effectiveCutoff };
+  return {
+    tier: isAbove ? 'ABOVE_LAST_CUTOFF' : 'BELOW_LAST_CUTOFF',
+    margin,
+    effectiveCutoff,
+    label: isAbove
+      ? `2024/25 Cutoff: ${effectiveCutoff.toFixed(4)} (Your Z: +${margin.toFixed(4)})`
+      : `2024/25 Cutoff: ${effectiveCutoff.toFixed(4)} (Your Z: ${margin.toFixed(4)})`,
+    description: isAbove
+      ? `Your Z-score (${input.studentZ.toFixed(4)}) is +${margin.toFixed(4)} above the 2024/25 cutoff (${effectiveCutoff.toFixed(4)}).`
+      : `Your Z-score (${input.studentZ.toFixed(4)}) is ${margin.toFixed(4)} below the 2024/25 cutoff (${effectiveCutoff.toFixed(4)}).`,
+  };
 }
 
 export interface PreferencePlanItem {

@@ -95,3 +95,14 @@
 - [x] **Slice 3 (Prompt 3)**: Built Dedicated "Private, Foreign-Affiliated & Non-State Universities Hub" (`/private-unis` route, `src/components/PrivateUniversitiesView.tsx`, `PRIVATE_AND_ALTERNATIVE_PROGRAMS` dataset across Tiers 2, 3, and 4, and `private_programs` table in `supabase/schema.sql`).
 - [x] **Slice 4 (Prompt 4)**: Built interactive "4-Year Degree Cost, IFSLS Loan Repayment & Salary ROI Calculator" widget (`src/components/DegreeRoiCalculator.tsx`) and integrated into `CompareEngineView.tsx` and `PrivateUniversitiesView.tsx`.
 - [x] **Verification**: `npx vitest run` (8/8 passing) + `npm run build` (zero errors, 5.69s).
+
+## Change 2026-11-03: Zero-Prediction, Direct Private Apply & Ultra-Advanced Filter Playbook
+- **triage**: Size M | Types: `feature`, `upgrade`, `content`
+- **safety**: Branch `change/zero-prediction-advanced-filter` created from clean `main` (commit `c9c1b54`).
+- **baseline**: Vitest `8/8` passing; `npm run build` clean (`0` errors).
+
+### Slices
+- [x] **Slice 1 (Prompt 1)**: Completely removed all Z-score & admission probability predictions (`Safe / Target / Reach`), updated `classifyProgramMatch` to factual comparison (`ABOVE_LAST_CUTOFF`, `BELOW_LAST_CUTOFF`, `CUTOFF_ONLY`, `NQC`), updated `ProgramChanceCard.tsx`, renamed "Predictor" to "Course & Cutoff Finder" across the app (`I18N_DICT`, titles, nav, CTAs), and updated unit tests (8/8 passed).
+- [x] **Slice 2 (Prompt 2)**: Removed `SingleWindowCafDrawer` popup completely, expanded `NON_STATE_IFSLS_PATHWAYS` in `sriLankaUgcSnapshot.ts` with rich filter metadata and exact official URLs for 14 verified programs, and wired direct external apply buttons (`Apply on {abbr} Official Page ↗`, `Official Program Page ↗`, `MOHE 0% Loan Portal ↗`).
+- [x] **Slice 3 (Prompt 3)**: Built the Ultra-Advanced 3-Layer Filter & Discovery Engine in `PredictorView.tsx` (8 preset pills, 15-second guided wizard, 12-category sticky left sidebar with live counts `(N)`, active filter chips with remove, Card Grid vs Compact Cutoff & Fee Table view toggle, multi-sort, zero splash curtain) and updated `HomeDiscoveryView.tsx`.
+- [x] **Verification**: `npx vitest run` (8/8 passed) + `npm run build` (clean 0-error build in 6.29s).

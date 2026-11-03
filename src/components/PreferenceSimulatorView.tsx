@@ -261,17 +261,23 @@ export const PreferenceSimulatorContent: React.FC<{ compact?: boolean }> = ({ co
                     </span>
                     <span>·</span>
                     <span>
-                      Tier:{' '}
+                      2024/25 Cutoff Status:{' '}
                       <strong
                         className={
-                          match.tier === 'SAFE'
+                          match.tier === 'ABOVE_LAST_CUTOFF'
                             ? 'text-emerald-700'
-                            : match.tier === 'TARGET'
+                            : match.tier === 'BELOW_LAST_CUTOFF'
                             ? 'text-amber-700'
-                            : 'text-rose-700'
+                            : 'text-slate-700'
                         }
                       >
-                        {match.tier}
+                        {match.tier === 'ABOVE_LAST_CUTOFF'
+                          ? 'Above 2024/25 Cutoff'
+                          : match.tier === 'BELOW_LAST_CUTOFF'
+                          ? 'Below 2024/25 Cutoff'
+                          : match.tier === 'NQC'
+                          ? 'NQC in 2024/25'
+                          : 'Cutoff Published'}
                       </strong>
                     </span>
                   </div>

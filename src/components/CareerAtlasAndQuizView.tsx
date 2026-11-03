@@ -48,7 +48,7 @@ export const CareerAtlasAndQuizView: React.FC<{ initialTab?: 'atlas' | 'quiz' }>
     districtPrograms,
     addToPlan,
     openCourseProfile,
-    setIsCafDrawerOpen,
+    setRoute,
   } = useApp();
 
   const [mode, setMode] = useState<'atlas' | 'quiz'>(initialTab);
@@ -271,10 +271,10 @@ export const CareerAtlasAndQuizView: React.FC<{ initialTab?: 'atlas' | 'quiz' }>
                   </span>
                   <button
                     type="button"
-                    onClick={() => setIsCafDrawerOpen(true)}
+                    onClick={() => setRoute('private-unis')}
                     className="text-xs font-extrabold text-amber-700 hover:underline inline-flex items-center gap-1"
                   >
-                    <span>Inquire About Backup Pathways</span>
+                    <span>Explore Private & IFSLS Degrees</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -426,13 +426,14 @@ export const CareerAtlasAndQuizView: React.FC<{ initialTab?: 'atlas' | 'quiz' }>
                           <div className="font-bold text-sm mt-0.5">{backup.degree_title}</div>
                           <p className="text-xs text-slate-300 mt-0.5">{backup.tuition_note_lkr}</p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setIsCafDrawerOpen(true)}
-                          className="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-extrabold shrink-0"
+                        <a
+                          href={backup.apply_url || 'https://studentloans.mohe.gov.lk'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shrink-0 inline-flex items-center gap-1"
                         >
-                          Apply
-                        </button>
+                          <span>Apply on {backup.institute_abbr} ↗</span>
+                        </a>
                       </div>
                     ))}
                   </div>
@@ -442,201 +443,6 @@ export const CareerAtlasAndQuizView: React.FC<{ initialTab?: 'atlas' | 'quiz' }>
           )}
         </div>
       )}
-    </div>
-  );
-};
-
-export const SingleWindowCafDrawer: React.FC = () => {
-  const {
-    isCafDrawerOpen,
-    setIsCafDrawerOpen,
-    district,
-    studentStream,
-    studentZScore,
-  } = useApp();
-
-  const [fullName, setFullName] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [gradesSummary, setGradesSummary] = useState('A, B, B');
-  const [selectedIds, setSelectedIds] = useState<string[]>([
-    'ifsls-sliit-se',
-    'ifsls-nsbm-cs',
-  ]);
-  const [submittedState, setSubmittedState] = useState<null | { source: string }>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  if (!isCafDrawerOpen) return null;
-
-  const toggleProgram = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg(null);
-    try {
-      const res = await submitStudentBackupApplication({
-        full_name: fullName,
-        district_id: district.district_id,
-        stream: studentStream,
-        subject_grades: [{ subject: studentStream, grade: gradesSummary }],
-        z_score: studentZScore,
-        whatsapp,
-        selected_programs: selectedIds,
-      });
-      setSubmittedState({ source: res.source });
-    } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'Submission error');
-    }
-  };
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="caf-drawer-title"
-      className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end no-print"
-    >
-      <div className="bg-white w-full max-w-xl h-full flex flex-col shadow-2xl border-l border-slate-200 drawer-transition">
-        <div className="px-5 py-4 bg-[var(--color-brand-primary)] text-white flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-bold text-amber-300 uppercase">
-              CollegeDekho Common Application Form (CAF) Equivalent
-            </span>
-            <h2 id="caf-drawer-title" className="text-base sm:text-lg font-extrabold">
-              1-Click Private & MOHE Interest-Free Loan Backup Application
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={() => setIsCafDrawerOpen(false)}
-            aria-label="Close backup application drawer"
-            className="p-1.5 rounded-lg bg-slate-800 text-slate-200 hover:text-white"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-5 overflow-y-auto flex-1 space-y-4">
-          {submittedState ? (
-            <div className="p-6 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 space-y-3 text-center">
-              <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-              <h3 className="text-lg font-extrabold">
-                Single-Window Backup Inquiry Saved!
-              </h3>
-              <p className="text-xs sm:text-sm text-emerald-900">
-                Your A/L profile ({studentStream}, Z: {studentZScore.toFixed(4)}, {district.district_name}) has been queued for {selectedIds.length} accredited partner institutes.
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setSubmittedState(null);
-                  setIsCafDrawerOpen(false);
-                }}
-                className="px-4 py-2 rounded-lg bg-emerald-700 text-white text-xs font-bold"
-              >
-                Close Window
-              </button>
-            </div>
-          ) : (
-            <>
-              <p className="text-xs text-slate-600">
-                Submit your A/L profile once to request free counseling or interest-free loan (IFSLS) eligibility checks across multiple MOHE/UGC-recognized non-state and NVQ institutes.
-              </p>
-
-              {errorMsg && (
-                <div role="alert" className="p-3 rounded-lg bg-rose-50 border border-rose-300 text-rose-900 text-xs font-bold">
-                  {errorMsg}
-                </div>
-              )}
-
-              <div>
-                <label htmlFor="caf-name" className="block text-xs font-bold text-slate-700 mb-1">
-                  Student Full Name *
-                </label>
-                <input
-                  id="caf-name"
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Kasun Bandara"
-                  className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-sm"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="caf-whatsapp" className="block text-xs font-bold text-slate-700 mb-1">
-                    WhatsApp Number *
-                  </label>
-                  <input
-                    id="caf-whatsapp"
-                    type="tel"
-                    required
-                    value={whatsapp}
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                    placeholder="077 123 4567"
-                    className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-sm font-tabular"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="caf-grades" className="block text-xs font-bold text-slate-700 mb-1">
-                    3 A/L Subject Grades
-                  </label>
-                  <input
-                    id="caf-grades"
-                    type="text"
-                    value={gradesSummary}
-                    onChange={(e) => setGradesSummary(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-sm font-tabular"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <span className="block text-xs font-bold text-slate-700 mb-2">
-                  Select Partner Non-State / IFSLS / TVEC Backup Programs:
-                </span>
-                <div className="space-y-2">
-                  {NON_STATE_IFSLS_PATHWAYS.map((item) => (
-                    <label
-                      key={item.id}
-                      className={`p-3 rounded-lg border flex items-start gap-2.5 cursor-pointer text-xs ${
-                        selectedIds.includes(item.id)
-                          ? 'border-amber-500 bg-amber-50/70'
-                          : 'border-slate-200 bg-slate-50'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.includes(item.id)}
-                        onChange={() => toggleProgram(item.id)}
-                        className="mt-0.5"
-                      />
-                      <div>
-                        <div className="font-bold text-slate-900">
-                          {item.institute_abbr} — {item.degree_title}
-                        </div>
-                        <div className="text-slate-600 mt-0.5">{item.tuition_note_lkr}</div>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm shadow-sm"
-              >
-                Submit Single-Window Backup Application ({selectedIds.length} Selected)
-              </button>
-            </>
-          )}
-        </form>
-      </div>
     </div>
   );
 };

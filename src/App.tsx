@@ -8,10 +8,7 @@ import {
   PreferenceSimulatorDrawer,
 } from './components/PreferenceSimulatorView';
 import { CompareEngineView } from './components/CompareEngineView';
-import {
-  CareerAtlasAndQuizView,
-  SingleWindowCafDrawer,
-} from './components/CareerAtlasAndQuizView';
+import { CareerAtlasAndQuizView } from './components/CareerAtlasAndQuizView';
 import {
   InstitutionAndCourseProfileView,
   AdmissionsCalendarView,
@@ -20,12 +17,12 @@ import { WelcomeSplashModal } from './components/WelcomeSplashModal';
 import { PrivateUniversitiesView } from './components/PrivateUniversitiesView';
 
 const AppRouterContent: React.FC = () => {
-  const { route, district, setRoute, setIsCafDrawerOpen, isWelcomeOpen, setIsWelcomeOpen } = useApp();
+  const { route, district, setRoute, isWelcomeOpen, setIsWelcomeOpen } = useApp();
 
   useEffect(() => {
     const titles: Record<string, string> = {
       home: `LankaVuz (${district.district_name}) — Sri Lanka UGC Z-Score Cutoff Atlas & Higher Education Portal`,
-      predictor: `Z-Score & 3-Subject A/L Predictor (${district.district_name}) — LankaVuz`,
+      predictor: `Course & 2024/25 Cutoff Finder (${district.district_name}) — LankaVuz`,
       'my-plan': `My UGC Preference Order Simulator & Conflict Auditor — LankaVuz`,
       compare: `4-Way University & UGC uni_code Comparator — LankaVuz`,
       careers: `Sri Lanka Career-to-Degree Atlas & LKR Salary Guide — LankaVuz`,
@@ -56,7 +53,6 @@ const AppRouterContent: React.FC = () => {
       </main>
 
       <PreferenceSimulatorDrawer />
-      <SingleWindowCafDrawer />
       <WelcomeSplashModal isOpen={isWelcomeOpen} onClose={() => setIsWelcomeOpen(false)} />
 
       {/* Authoritative Footer */}
@@ -76,7 +72,7 @@ const AppRouterContent: React.FC = () => {
             <ul className="space-y-1">
               <li>
                 <button type="button" onClick={() => setRoute('predictor')} className="hover:text-amber-300">
-                  Z-Score + 3-Subject A/L Matcher
+                  Course & Cutoff Finder
                 </button>
               </li>
               <li>
@@ -111,8 +107,8 @@ const AppRouterContent: React.FC = () => {
                 </button>
               </li>
               <li>
-                <button type="button" onClick={() => setIsCafDrawerOpen(true)} className="hover:text-amber-300">
-                  1-Click IFSLS & Non-State Backup Form
+                <button type="button" onClick={() => setRoute('private-unis')} className="hover:text-amber-300">
+                  MOHE IFSLS & Non-State Admissions ↗
                 </button>
               </li>
             </ul>

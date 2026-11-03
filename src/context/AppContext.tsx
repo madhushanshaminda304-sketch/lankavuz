@@ -58,8 +58,6 @@ export interface AppContextValue {
   compareList: string[];
   toggleCompare: (uniCode: string) => void;
   setComparePreset: (codes: string[]) => void;
-  isCafDrawerOpen: boolean;
-  setIsCafDrawerOpen: (v: boolean) => void;
   openInstitutionProfile: (code: string) => void;
   openCourseProfile: (uniCode: string) => void;
   isWelcomeOpen: boolean;
@@ -69,47 +67,51 @@ export interface AppContextValue {
 const I18N_DICT: Record<LanguageCode, Record<string, string>> = {
   EN: {
     brandSubtitle: 'Sri Lanka UGC & Degree Atlas',
-    navPredictor: 'Z-Score Predictor',
+    navPredictor: 'Course & Cutoff Finder',
     navCatalog: 'Universities & Courses',
     navCompare: 'Compare (4-Way)',
     navCareers: 'Career Compass',
     navCalendar: 'Admissions Calendar',
     navPrivateUnis: 'Private & Non-State Campuses',
+    backupCta: 'Private & IFSLS Degrees',
     myPlan: 'My UGC Plan',
     quotaBadge: 'Active Quota District',
     changeDistrict: 'Change',
     heroTag: 'Official 25-District UGC Z-Score Cutoff Atlas, 3-Subject A/L Matcher, Preference Order Simulator & MOHE Interest-Free Loan Bridge.',
     searchPlaceholder: 'Search uni_code (001A, 008G), Medicine, CS, UOM...',
-    ctaSafeTargetReach: 'Check Safe / Target / Reach',
+    ctaSafeTargetReach: 'Open Course & Cutoff Finder',
   },
   SI: {
     brandSubtitle: 'ශ්‍රී ලංකා විශ්වවිද්‍යාල සහ උපාධි ඇට්ලස්',
-    navPredictor: 'Z-ලකුණු පුරෝකථනය',
+    navPredictor: 'පාඨමාලා සහ Z-ලකුණු සෙවුම',
     navCatalog: 'විශ්වවිද්‍යාල සහ පාඨමාලා',
     navCompare: 'සංසන්දනය (4-ක්‍රම)',
     navCareers: 'වෘත්තීය මාලිමාව',
     navCalendar: 'ඇතුළත් කිරීම් දින දර්ශනය',
+    navPrivateUnis: 'පෞද්ගලික සහ රාජ්‍ය නොවන විශ්වවිද්‍යාල',
+    backupCta: 'පෞද්ගලික සහ IFSLS උපාධි',
     myPlan: 'මගේ UGC සැලැස්ම',
     quotaBadge: 'දිස්ත්‍රික් කෝටාව',
     changeDistrict: 'වෙනස් කරන්න',
     heroTag: 'නිල දිස්ත්‍රික් 25 UGC Z-ලකුණු සීමා, A/L විෂය 3 පරීක්ෂාව, මනාප ගැටුම් විසඳුම් සහ MOHE පොලී රහිත ණය පාලම.',
     searchPlaceholder: 'uni_code (001A, 008G), වෛද්‍ය, CS, UOM සොයන්න...',
-    ctaSafeTargetReach: 'ආරක්ෂිත / ඉලක්ක / අපේක්ෂිත පරීක්ෂාව',
+    ctaSafeTargetReach: 'පාඨමාලා සහ සීමා ලකුණු ගවේෂණය',
   },
   TA: {
     brandSubtitle: 'இலங்கை UGC மற்றும் பட்டப்படிப்பு வழிகாட்டி',
-    navPredictor: 'Z-புள்ளி கணிப்பான்',
+    navPredictor: 'கற்கைகள் & Z-புள்ளி தேடல்',
     navCatalog: 'பல்கலைக்கழகங்கள் & பாடநெறிகள்',
     navCompare: 'ஒப்பீடு (4-வழி)',
     navCareers: 'தொழில் வழிகாட்டி',
     navCalendar: 'சேர்க்கை நாட்கාட்டி',
     navPrivateUnis: 'தனியார் & அரச சார்பற்ற பல்கலைக்கழகங்கள்',
+    backupCta: 'தனியார் & IFSLS பட்டங்கள்',
     myPlan: 'எனது UGC திட்டம்',
     quotaBadge: 'மாவட்ட ஒதுக்கீடு',
     changeDistrict: 'மாற்று',
     heroTag: 'அதிகாரப்பூர்வ 25 மாவட்ட UGC Z-புள்ளி வழிகாட்டி, 3-பாட A/L சேர்க்கை, விருப்ப ஒழுங்கு மற்றும் வட்டி இல்லாத கடன் பாலம்.',
     searchPlaceholder: 'uni_code (001A, 008G), மருத்துவம், CS, UOM தேடுக...',
-    ctaSafeTargetReach: 'பாதுகாப்பான / இலக்கு / சாத்தியம் காண்க',
+    ctaSafeTargetReach: 'பாடநெறிகள் மற்றும் வெட்டுப்புள்ளிகள்',
   },
 };
 
@@ -160,7 +162,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [compareList, setCompareList] = useState<string[]>(['012T', '026G', '012C', '136L']);
   const [isPlanDrawerOpen, setIsPlanDrawerOpen] = useState(false);
-  const [isCafDrawerOpen, setIsCafDrawerOpen] = useState(false);
   const [districtPrograms, setDistrictPrograms] = useState<ProgramCutoffViewRow[]>([]);
 
   const district = useMemo(
@@ -355,8 +356,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         compareList,
         toggleCompare,
         setComparePreset,
-        isCafDrawerOpen,
-        setIsCafDrawerOpen,
         openInstitutionProfile,
         openCourseProfile,
         isWelcomeOpen,
