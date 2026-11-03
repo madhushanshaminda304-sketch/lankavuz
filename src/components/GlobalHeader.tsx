@@ -121,28 +121,28 @@ export const GlobalHeader: React.FC = () => {
     );
   }, [districtFilter]);
 
-  // 4 Core Hubs Navigation
+  // 4 Core Hubs Navigation (Streamlined concise titles to prevent navbar overflow in Sinhala/Tamil)
   const navItems: { id: ActiveRoute; label: string; icon: React.ReactNode; badge?: number }[] = [
     {
       id: 'predictor',
-      label: `🧭 ${t.navPredictor}`,
-      icon: <Search className="w-3.5 h-3.5" />,
+      label: t.navPredictorShort || t.navPredictor,
+      icon: <Search className="w-3.5 h-3.5 shrink-0" />,
     },
     {
       id: 'my-plan',
-      label: `📋 ${t.myPlan}`,
-      icon: <ListChecks className="w-3.5 h-3.5" />,
+      label: t.myPlanShort || t.myPlan,
+      icon: <ListChecks className="w-3.5 h-3.5 shrink-0" />,
       badge: planEntries.length,
     },
     {
       id: 'private-unis',
-      label: `🏛️ ${t.navPrivateUnis}`,
-      icon: <Building2 className="w-3.5 h-3.5" />,
+      label: t.navPrivateUnisShort || t.navPrivateUnis,
+      icon: <Building2 className="w-3.5 h-3.5 shrink-0" />,
     },
     {
       id: 'careers',
-      label: `💡 ${t.navCareers}`,
-      icon: <Compass className="w-3.5 h-3.5" />,
+      label: t.navCareersShort || t.navCareers,
+      icon: <Compass className="w-3.5 h-3.5 shrink-0" />,
     },
   ];
 
@@ -165,7 +165,7 @@ export const GlobalHeader: React.FC = () => {
                 <span className="font-extrabold text-lg tracking-tight block leading-none text-white">
                   Lanka<span className="text-amber-400">Vuz</span>
                 </span>
-                <span className="text-[11px] text-slate-400 hidden sm:block leading-tight font-medium">
+                <span className="text-[11px] text-slate-400 hidden 2xl:block leading-tight font-medium truncate max-w-[180px]">
                   {t.brandSubtitle}
                 </span>
               </div>
@@ -186,8 +186,8 @@ export const GlobalHeader: React.FC = () => {
             </button>
           </div>
 
-          {/* Desktop 4 Core Hubs Navigation (Replaces old fragmented navbar) */}
-          <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-1">
+          {/* Desktop 4 Core Hubs Navigation (Responsive with truncation to protect layout borders) */}
+          <nav aria-label="Primary navigation" className="hidden xl:flex items-center gap-1 min-w-0">
             {navItems.map((item) => {
               const isActive = route === item.id;
               return (
@@ -195,17 +195,17 @@ export const GlobalHeader: React.FC = () => {
                   key={item.id}
                   type="button"
                   onClick={() => setRoute(item.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
                     isActive
                       ? 'bg-amber-500 text-slate-950 shadow-xs'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
                   }`}
                 >
                   {item.icon}
-                  <span>{item.label}</span>
+                  <span className="truncate max-w-[110px] 2xl:max-w-none">{item.label}</span>
                   {item.badge !== undefined && item.badge > 0 && (
                     <span
-                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-tabular ${
+                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-tabular shrink-0 ${
                         isActive ? 'bg-slate-950 text-amber-300' : 'bg-slate-700 text-amber-300'
                       }`}
                     >
@@ -218,7 +218,7 @@ export const GlobalHeader: React.FC = () => {
           </nav>
 
           {/* Right Action Tools: ⌘K Palette Button, Language, Setup */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Global ⌘K Search Trigger Button */}
             <button
               type="button"
@@ -227,8 +227,8 @@ export const GlobalHeader: React.FC = () => {
               title="Search uni_codes, courses & campuses (⌘K / Ctrl+K)"
             >
               <Search className="w-3.5 h-3.5 text-slate-400" />
-              <span className="hidden xl:inline text-slate-400">{t.searchNavPlaceholder}</span>
-              <span className="xl:hidden">{t.search}</span>
+              <span className="hidden 2xl:inline text-slate-400 truncate max-w-[140px]">{t.searchNavPlaceholder}</span>
+              <span className="hidden sm:inline 2xl:hidden">{t.search}</span>
               <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono text-slate-400 font-bold">
                 <Command className="w-2.5 h-2.5" /> K
               </kbd>
@@ -298,50 +298,50 @@ export const GlobalHeader: React.FC = () => {
         </div>
       </header>
 
-      {/* Mobile Fixed Bottom Hub Navigation Bar */}
+      {/* Mobile & Tablet Fixed Bottom Hub Navigation Bar */}
       <nav
         aria-label="Mobile bottom navigation"
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--primitive-obsidian-900)] border-t border-slate-800 text-white grid grid-cols-4 h-14 no-print shadow-xl"
+        className="xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--primitive-obsidian-900)] border-t border-slate-800 text-white grid grid-cols-4 h-14 no-print shadow-xl"
       >
         <button
           type="button"
           onClick={() => setRoute('predictor')}
-          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] ${
+          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] min-w-0 px-1 overflow-hidden ${
             route === 'predictor' ? 'text-amber-400 font-bold' : 'text-slate-400'
           }`}
         >
-          <Search className="w-4 h-4" />
-          <span>{t.navPredictorShort}</span>
+          <Search className="w-4 h-4 shrink-0" />
+          <span className="truncate max-w-full text-center leading-tight">{t.navPredictorShort}</span>
         </button>
         <button
           type="button"
           onClick={() => setRoute('my-plan')}
-          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] relative ${
+          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] min-w-0 px-1 overflow-hidden relative ${
             route === 'my-plan' ? 'text-amber-400 font-bold' : 'text-slate-400'
           }`}
         >
-          <ListChecks className="w-4 h-4" />
-          <span>{t.myPlanShort} ({planEntries.length})</span>
+          <ListChecks className="w-4 h-4 shrink-0" />
+          <span className="truncate max-w-full text-center leading-tight">{t.myPlanShort} ({planEntries.length})</span>
         </button>
         <button
           type="button"
           onClick={() => setRoute('private-unis')}
-          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] ${
+          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] min-w-0 px-1 overflow-hidden ${
             route === 'private-unis' ? 'text-amber-400 font-bold' : 'text-slate-400'
           }`}
         >
-          <Building2 className="w-4 h-4" />
-          <span>{t.navPrivateUnisShort}</span>
+          <Building2 className="w-4 h-4 shrink-0" />
+          <span className="truncate max-w-full text-center leading-tight">{t.navPrivateUnisShort}</span>
         </button>
         <button
           type="button"
           onClick={() => setRoute('careers')}
-          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] ${
+          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] min-w-0 px-1 overflow-hidden ${
             route === 'careers' ? 'text-amber-400 font-bold' : 'text-slate-400'
           }`}
         >
-          <Compass className="w-4 h-4" />
-          <span>{t.navCareersShort}</span>
+          <Compass className="w-4 h-4 shrink-0" />
+          <span className="truncate max-w-full text-center leading-tight">{t.navCareersShort}</span>
         </button>
       </nav>
 

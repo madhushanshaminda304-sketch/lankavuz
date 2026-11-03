@@ -830,10 +830,10 @@ export const PredictorView: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsDistrictModalOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--color-brand-primary)] text-white text-xs sm:text-sm font-bold self-start md:self-auto shrink-0 shadow-xs hover:bg-slate-800 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--color-brand-primary)] text-white text-xs sm:text-sm font-bold self-start md:self-auto shrink-0 shadow-xs hover:bg-slate-800 transition-colors max-w-full"
         >
-          <MapPin className="w-4 h-4 text-amber-400" />
-          <span>{t.quotaBadge}: {getLocalizedDistrictName(district, lang)} (#{district.district_id})</span>
+          <MapPin className="w-4 h-4 text-amber-400 shrink-0" />
+          <span className="truncate max-w-[260px] sm:max-w-none">{t.quotaBadge}: {getLocalizedDistrictName(district, lang)} (#{district.district_id})</span>
         </button>
       </div>
 
