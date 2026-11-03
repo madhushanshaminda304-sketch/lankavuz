@@ -30,6 +30,7 @@ export const HomeDiscoveryView: React.FC = () => {
     setDistrictId,
     setIsDistrictModalOpen,
     districtPrograms,
+    t,
     studentZScore,
     setStudentZScore,
     studentStream,
@@ -100,10 +101,10 @@ export const HomeDiscoveryView: React.FC = () => {
           {/* Hero Typography */}
           <div className="max-w-3xl space-y-3">
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-              Sri Lanka Higher Education & 2024/25 Cutoff Atlas
+              {t.heroTitle || 'Sri Lanka Higher Education & 2024/25 Cutoff Atlas'}
             </h1>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-              Compare your official G.C.E. A/L Z-score directly against verified historical cutoffs across 21 State UGC Universities, MOHE Interest-Free Student Loans (IFSLS), and Direct Private / Foreign Degree Pathways.
+              {t.heroSub || 'Compare your official G.C.E. A/L Z-score directly against verified historical cutoffs across 21 State UGC Universities, MOHE Interest-Free Student Loans (IFSLS), and Direct Private / Foreign Degree Pathways.'}
             </p>
           </div>
 
@@ -177,7 +178,7 @@ export const HomeDiscoveryView: React.FC = () => {
                 type="submit"
                 className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow-md interactive-surface flex items-center justify-center gap-2"
               >
-                <span>Explore 2024/25 Cutoffs</span>
+                <span>{t.ctaSafeTargetReach || 'Explore 2024/25 Cutoffs'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

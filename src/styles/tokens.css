@@ -1,5 +1,5 @@
-/* hallmark: v3.0.0 · shape: workbench · theme: editorial-tech-prestige · genre: prestige-academic · signature: factual-z-cutoff-atlas */
-/* critique: prestigious higher education discovery portal with obsidian navy, champagne gold accents, 1px hairline borders, and glassmorphic floating docks */
+/* hallmark: v3.1.0 · shape: workbench · theme: editorial-tech-prestige · genre: prestige-academic · signature: multilingual-noto-typography */
+/* critique: prestigious higher education discovery portal with obsidian navy, champagne gold accents, 1px hairline borders, and natural Noto Sans Sinhala & Tamil script rendering */
 
 @import "tailwindcss";
 
@@ -49,8 +49,8 @@
   --color-text-secondary: #334155;
   --color-text-muted: #64748B;
 
-  /* Typography Tokens */
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Multilingual Typography Tokens (Plus Jakarta Sans + Noto Sans Sinhala + Noto Sans Tamil) */
+  --font-sans: 'Plus Jakarta Sans', 'Noto Sans Sinhala', 'Noto Sans Tamil', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Spacing, Radius & Shadow Tokens */
@@ -91,6 +91,33 @@ h1, h2, h3, h4 {
   overflow-wrap: break-word;
   min-width: 0;
   letter-spacing: -0.025em;
+}
+
+/* ========================================================
+   NATURAL SINHALA & TAMIL TYPOGRAPHY OVERRIDES
+   Prevents negative tracking from clipping ligatures/diacritics
+   and gives breathing room to combining vowel signs.
+   ======================================================== */
+:lang(si), [lang="si"], .font-si {
+  font-family: 'Noto Sans Sinhala', var(--font-sans);
+  letter-spacing: 0 !important;
+  word-spacing: 0.025em;
+  line-height: 1.65;
+}
+
+:lang(ta), [lang="ta"], .font-ta {
+  font-family: 'Noto Sans Tamil', var(--font-sans);
+  letter-spacing: 0 !important;
+  word-spacing: 0.025em;
+  line-height: 1.65;
+}
+
+:lang(si) h1, :lang(si) h2, :lang(si) h3, :lang(si) h4,
+:lang(ta) h1, :lang(ta) h2, :lang(ta) h3, :lang(ta) h4,
+[lang="si"] h1, [lang="si"] h2, [lang="si"] h3, [lang="si"] h4,
+[lang="ta"] h1, [lang="ta"] h2, [lang="ta"] h3, [lang="ta"] h4 {
+  letter-spacing: 0 !important;
+  line-height: 1.45;
 }
 
 /* Instant keyboard focus-visible ring */

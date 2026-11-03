@@ -67,6 +67,9 @@ export interface AppContextValue {
 const I18N_DICT: Record<LanguageCode, Record<string, string>> = {
   EN: {
     brandSubtitle: 'Sri Lanka UGC & Degree Atlas',
+    heroTitle: 'Official 25-District Sri Lanka UGC Z-Score Cutoff Atlas',
+    heroSub:
+      'Zero-prediction, 100% factual cutoff matching across 21 State UGC Universities, MOHE Interest-Free Student Loans (IFSLS), and Direct Private / Foreign Degree Pathways.',
     navPredictor: 'Course & Cutoff Finder',
     navCatalog: 'Universities & Courses',
     navCompare: 'Compare (4-Way)',
@@ -77,41 +80,50 @@ const I18N_DICT: Record<LanguageCode, Record<string, string>> = {
     myPlan: 'My UGC Plan',
     quotaBadge: 'Active Quota District',
     changeDistrict: 'Change',
-    heroTag: 'Official 25-District UGC Z-Score Cutoff Atlas, 3-Subject A/L Matcher, Preference Order Simulator & MOHE Interest-Free Loan Bridge.',
+    heroTag:
+      'Official 25-District UGC Z-Score Cutoff Atlas, 3-Subject A/L Matcher, Preference Order Simulator & MOHE Interest-Free Loan Bridge.',
     searchPlaceholder: 'Search uni_code (001A, 008G), Medicine, CS, UOM...',
-    ctaSafeTargetReach: 'Open Course & Cutoff Finder',
+    ctaSafeTargetReach: 'Open Course & Cutoff Finder →',
   },
   SI: {
-    brandSubtitle: 'ශ්‍රී ලංකා විශ්වවිද්‍යාල සහ උපාධි ඇට්ලස්',
-    navPredictor: 'පාඨමාලා සහ Z-ලකුණු සෙවුම',
-    navCatalog: 'විශ්වවිද්‍යාල සහ පාඨමාලා',
-    navCompare: 'සංසන්දනය (4-ක්‍රම)',
-    navCareers: 'වෘත්තීය මාලිමාව',
-    navCalendar: 'ඇතුළත් කිරීම් දින දර්ශනය',
-    navPrivateUnis: 'පෞද්ගලික සහ රාජ්‍ය නොවන විශ්වවිද්‍යාල',
-    backupCta: 'පෞද්ගලික සහ IFSLS උපාධි',
-    myPlan: 'මගේ UGC සැලැස්ම',
-    quotaBadge: 'දිස්ත්‍රික් කෝටාව',
+    brandSubtitle: 'ශ්‍රී ලංකා විශ්වවිද්‍යාල ප්‍රවේශ සහ Z-Score මාර්ගෝපදේශය',
+    heroTitle: 'ශ්‍රී ලංකා විශ්වවිද්‍යාල ප්‍රතිපාදන කොමිෂන් සභාවේ (UGC) නිල 2024/25 Z-Score සීමා ලකුණු නාමාවලිය',
+    heroSub:
+      'රාජ්‍ය විශ්වවිද්‍යාල 21ක්, උසස් අධ්‍යාපන අමාත්‍යාංශයේ (MOHE) පොලී රහිත ශිෂ්‍ය ණය (IFSLS) සහ සෘජු පෞද්ගලික/විදේශීය උපාධි සඳහා වන නිල සීමා ලකුණු සසඳා බලන්න.',
+    navPredictor: 'පාඨමාලා සහ Z-Score සීමා ලකුණු',
+    navCatalog: 'රාජ්‍ය විශ්වවිද්‍යාල සහ පාඨමාලා',
+    navCompare: 'උපාධි සංසන්දනය (4-ක්‍රම)',
+    navCareers: 'වෘත්තීය මාලිමාව සහ ආදායම් මාර්ග',
+    navCalendar: 'ඇතුළත් කිරීම් සහ අභියෝග්‍යතා දින දර්ශනය',
+    navPrivateUnis: 'රාජ්‍ය නොවන සහ IFSLS ශිෂ්‍ය ණය උපාධි',
+    backupCta: 'පොලී රහිත ණය සහ රාජ්‍ය නොවන උපාධි',
+    myPlan: 'මගේ UGC මනාප අනුපිළිවෙල',
+    quotaBadge: 'තේරීම් දිස්ත්‍රික්කය',
     changeDistrict: 'වෙනස් කරන්න',
-    heroTag: 'නිල දිස්ත්‍රික් 25 UGC Z-ලකුණු සීමා, A/L විෂය 3 පරීක්ෂාව, මනාප ගැටුම් විසඳුම් සහ MOHE පොලී රහිත ණය පාලම.',
-    searchPlaceholder: 'uni_code (001A, 008G), වෛද්‍ය, CS, UOM සොයන්න...',
-    ctaSafeTargetReach: 'පාඨමාලා සහ සීමා ලකුණු ගවේෂණය',
+    heroTag:
+      'දිස්ත්‍රික්ක 25 නිල UGC Z-Score සීමා, A/L විෂය 3 පරීක්ෂාව, මනාප ගැටුම් විග්‍රහය සහ MOHE පොලී රහිත ණය පාලම.',
+    searchPlaceholder: 'uni_code (001A, 008G), වෛද්‍ය (MBBS), ඉංජිනේරු, CS, UOM සොයන්න...',
+    ctaSafeTargetReach: 'පාඨමාලා සහ සීමා ලකුණු සෙවුම විවෘත කරන්න →',
   },
   TA: {
-    brandSubtitle: 'இலங்கை UGC மற்றும் பட்டப்படிப்பு வழிகாட்டி',
-    navPredictor: 'கற்கைகள் & Z-புள்ளி தேடல்',
-    navCatalog: 'பல்கலைக்கழகங்கள் & பாடநெறிகள்',
-    navCompare: 'ஒப்பீடு (4-வழி)',
-    navCareers: 'தொழில் வழிகாட்டி',
-    navCalendar: 'சேர்க்கை நாட்கාட்டி',
-    navPrivateUnis: 'தனியார் & அரச சார்பற்ற பல்கலைக்கழகங்கள்',
-    backupCta: 'தனியார் & IFSLS பட்டங்கள்',
-    myPlan: 'எனது UGC திட்டம்',
-    quotaBadge: 'மாவட்ட ஒதுக்கீடு',
+    brandSubtitle: 'இலங்கை பல்கலைக்கழக அனுமதி மற்றும் Z-புள்ளி வழிகாட்டி',
+    heroTitle: 'இலங்கை பல்கலைக்கழக மானியங்கள் ஆணைக்குழுவின் (UGC) உத்தியோகபூர்வ 2024/25 Z-புள்ளி வெட்டுப்புள்ளி அட்டவணை',
+    heroSub:
+      '21 அரச பல்கலைக்கழகங்கள், உயர்கல்வி அமைச்சின் (MOHE) வட்டியற்ற மாணவர் கடன் (IFSLS) மற்றும் நேரடி தனியார்/வெளிநாட்டு பட்டப்படிப்புகளுக்கான உத்தியோகபூர்வ வெட்டுப்புள்ளிகளை ஒப்பிட்டுப் பாருங்கள்.',
+    navPredictor: 'பாடநெறிகள் மற்றும் Z-புள்ளி வெட்டுப்புள்ளிகள்',
+    navCatalog: 'அரச பல்கலைக்கழகங்கள் & பாடநெறிகள்',
+    navCompare: 'பட்டப்படிப்பு ஒப்பீடு (4-வழி)',
+    navCareers: 'தொழில் வழிகாட்டி & வருமான வழிகள்',
+    navCalendar: 'சேர்க்கை மற்றும் உளச்சார்பு நாட்காட்டி',
+    navPrivateUnis: 'அரச சார்பற்ற & IFSLS மாணவர் கடன் பட்டங்கள்',
+    backupCta: 'வட்டியற்ற கடன் & அரச சார்பற்ற பட்டங்கள்',
+    myPlan: 'எனது UGC தெரிவு ஒழுங்கு',
+    quotaBadge: 'ஒதுக்கீட்டு மாவட்டம்',
     changeDistrict: 'மாற்று',
-    heroTag: 'அதிகாரப்பூர்வ 25 மாவட்ட UGC Z-புள்ளி வழிகாட்டி, 3-பாட A/L சேர்க்கை, விருப்ப ஒழுங்கு மற்றும் வட்டி இல்லாத கடன் பாலம்.',
-    searchPlaceholder: 'uni_code (001A, 008G), மருத்துவம், CS, UOM தேடுக...',
-    ctaSafeTargetReach: 'பாடநெறிகள் மற்றும் வெட்டுப்புள்ளிகள்',
+    heroTag:
+      '25 மாவட்ட உத்தியோகபூர்வ UGC Z-புள்ளி வெட்டுப்புள்ளிகள், 3-பாட A/L தகுதி, விருப்ப ஒழுங்கு சரிபார்ப்பு மற்றும் MOHE வட்டியற்ற கடன் பாலம்.',
+    searchPlaceholder: 'uni_code (001A, 008G), மருத்துவம் (MBBS), பொறியியல், CS, UOM தேடுக...',
+    ctaSafeTargetReach: 'பாடநெறிகள் மற்றும் வெட்டுப்புள்ளிகள் தேடலைத் திறக்குக →',
   },
 };
 
@@ -136,6 +148,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   });
   const [lang, setLang] = useState<LanguageCode>('EN');
+
+  useEffect(() => {
+    document.documentElement.lang = lang.toLowerCase();
+  }, [lang]);
   const [route, setRouteState] = useState<ActiveRoute>('home');
   const [selectedInstitutionCode, setSelectedInstitutionCode] = useState<string>('UOM');
   const [selectedUniCode, setSelectedUniCode] = useState<string>('008G');
