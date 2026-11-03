@@ -45,9 +45,15 @@ export const PreferenceSimulatorContent: React.FC<{ compact?: boolean }> = ({ co
         status: prog?.status ?? 'QUALIFIED',
         all_island_merit_only: prog?.all_island_merit_only ?? false,
         aptitude_test_required: prog?.aptitude_test_required ?? false,
+        is_suspended: prog?.is_suspended ?? false,
+        requires_ol_special: prog?.requires_ol_special ?? false,
       };
     });
   }, [planEntries, districtPrograms]);
+
+  const suspendedItems = useMemo(() => {
+    return resolvedList.filter((r) => r.is_suspended);
+  }, [resolvedList]);
 
   const conflicts = useMemo(() => {
     const auditInput: PreferencePlanItem[] = resolvedList.map((r) => ({
@@ -63,7 +69,7 @@ export const PreferenceSimulatorContent: React.FC<{ compact?: boolean }> = ({ co
   // Simulate which preference the UGC computer algorithm will actually assign for studentZScore
   const simulatedAssignedIndex = useMemo(() => {
     return resolvedList.findIndex(
-      (item) => item.min_z_score !== null && studentZScore >= item.min_z_score
+      (item) => item.min_z_score !== null && studentZScore >= item.min_z_score && !item.is_suspended
     );
   }, [resolvedList, studentZScore]);
 
@@ -92,10 +98,13 @@ export const PreferenceSimulatorContent: React.FC<{ compact?: boolean }> = ({ co
       {/* Top Action & Status Bar */}
       <div className="bg-slate-900 text-white rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs text-amber-300 font-bold">
-            <span>Official UGC Computer Selection Algorithm Simulator</span>
-            <span>·</span>
-            <span>{district.district_name} District</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+            <span className="text-amber-300">Official UGC Computer Selection Algorithm Simulator</span>
+            <span className="text-slate-500">·</span>
+            <span className="text-slate-300">{district.district_name} District</span>
+            <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-tabular font-bold border border-amber-500/30">
+              Saved Preferences: {planEntries.length} / 125 Max Allowed (UGC Rule Section 3.1.6)
+            </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-300 mt-1">
             The UGC computer assigns the <strong>highest preference (#1 → #N)</strong> for which your Z-score ({studentZScore.toFixed(4)}) meets the cutoff, and ignores every choice below it.
@@ -131,6 +140,20 @@ export const PreferenceSimulatorContent: React.FC<{ compact?: boolean }> = ({ co
           </button>
         </div>
       </div>
+
+      {/* Suspended Course Warning Banner */}
+      {suspendedItems.length > 0 && (
+        <div role="alert" className="p-4 rounded-xl bg-rose-50 border-2 border-rose-500 text-rose-950 space-y-1">
+          <div className="flex items-center gap-2 font-extrabold text-sm sm:text-base">
+            <AlertTriangle className="w-5 h-5 text-rose-700 shrink-0" />
+            <span>⛔ Warning: Suspended Intake Course in Your Plan!</span>
+          </div>
+          <p className="text-xs sm:text-sm text-rose-900 leading-relaxed">
+            The following choice(s) are currently suspended for the 2025/2026 intake under UGC Curriculum Review:{' '}
+            <strong>{suspendedItems.map((s) => `${s.uni_code} (${s.course_name})`).join(', ')}</strong>. Please remove or replace them before final submission.
+          </p>
+        </div>
+      )}
 
       {/* Smart "Preference Order Conflict" Auditor Banner */}
       {conflicts.length > 0 ? (
@@ -330,6 +353,56 @@ export const PreferenceSimulatorContent: React.FC<{ compact?: boolean }> = ({ co
           </div>
         </div>
       )}
+
+      {/* Official UGC Submission & Post-Submission Rules Checklist (Section 3 & 5) */}
+      <section className="bg-slate-900 text-white rounded-xl p-5 sm:p-6 space-y-4 border border-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="font-extrabold text-sm sm:text-base text-amber-300 flex items-center gap-2">
+            <span>📜 Official UGC Submission & Post-Submission Rules Checklist</span>
+          </h3>
+          <span className="text-[11px] font-tabular px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+            Handbook Sections 3 & 5
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm text-slate-300">
+          <div className="p-3.5 rounded-lg bg-slate-800/80 border border-slate-700/80 space-y-1.5">
+            <h4 className="font-bold text-white flex items-center gap-1.5">
+              <span className="text-amber-400">1.</span> Registered Post Mandatory (Section 5.9)
+            </h4>
+            <p className="text-slate-300 leading-relaxed text-xs">
+              Submitting online is only for data entry verification. You <strong>MUST print</strong> the generated application, sign it with your parent/guardian, and send the hardcopy with certified copies of A/L and O/L certificates via <strong>Registered Post</strong> to the UGC Admissions Division before the deadline.
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-slate-800/80 border border-slate-700/80 space-y-1.5">
+            <h4 className="font-bold text-white flex items-center gap-1.5">
+              <span className="text-amber-400">2.</span> One-Time 2-Week Amendment Window (Section 3.3)
+            </h4>
+            <p className="text-slate-300 leading-relaxed text-xs">
+              Candidates are permitted to log in to reorder, add, or remove <code className="font-tabular text-amber-300">uni_code</code> choices only <strong>ONCE</strong> within two weeks of the initial closing date. The revised signed printout must again be mailed by Registered Post.
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-slate-800/80 border border-slate-700/80 space-y-1.5">
+            <h4 className="font-bold text-white flex items-center gap-1.5">
+              <span className="text-amber-400">3.</span> Automatic Promotion on Vacancies (Section 3.2)
+            </h4>
+            <p className="text-slate-300 leading-relaxed text-xs">
+              You must register for whatever course you are offered in Round 1 to remain eligible for automatic upgrading to higher preference courses as vacancies open. <em>Mutual transfers between students are strictly prohibited by law.</em>
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-slate-800/80 border border-slate-700/80 space-y-1.5">
+            <h4 className="font-bold text-white flex items-center gap-1.5">
+              <span className="text-amber-400">4.</span> 1-Year Maximum Postponement Rule
+            </h4>
+            <p className="text-slate-300 leading-relaxed text-xs">
+              Postponing admission is granted for medical or national reasons for a maximum of 1 academic year. Postponement locks you into the same selected <code className="font-tabular text-amber-300">uni_code</code> and permanently forfeits applying using a later year's A/L sitting.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

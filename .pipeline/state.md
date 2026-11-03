@@ -70,3 +70,16 @@
 
 ## Unresolved
 - None.
+
+## Change 2026-11-03: UGC Handbook Alignment & Antigravity Upgrade (Prompts 1–4)
+- **triage**: Size M | Types: `bug`, `feature`, `upgrade`
+- **safety**: Branch `change/ugc-audit-upgrade` created from clean `main` (commit `054e52e`).
+- **baseline**: Vitest `7/7` passing; production build clean (`0` errors); baseline screenshots in `.pipeline/after/`.
+
+### Slices
+- [x] **Slice 1 (Prompt 1)**: Fix Official 1–25 UGC District Order & Bidirectional Supabase Row Normalizer in `ugcDataService.ts` / `sriLankaUgcSnapshot.ts`.
+- [x] **Slice 2 (Prompt 2)**: Align all `uni_code` letters & institution codes to official UGC handbook standards across `sriLankaUgcSnapshot.ts`, `AppContext.tsx`, `CompareEngineView.tsx`, `ProfileAndCalendarView.tsx`, and tests.
+- [x] **Slice 3 (Prompt 3)**: Enforce official UGC eligibility rules (Suspended courses `is_suspended`, Special O/L badge `requires_ol_special`, 125 preference cap, and registered post submission checklist).
+- [x] **Slice 4 (Prompt 4)**: Implement deep-link URL hash routing (`#predictor`, `#course/008G`, `#institution/UOM`), interactive 1–5 star rating selectors, and filtered Reviews/Q&A.
+- [x] **Verification**: `npx vitest run` (8/8 passing) + `npm run build` (clean 0-error Vite/TypeScript build).
+

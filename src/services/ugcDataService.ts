@@ -59,6 +59,70 @@ export interface MatchedProgramRow extends ProgramCutoffViewRow {
   chance_tier: ChanceTier;
 }
 
+/**
+ * Bidirectional row normalizer mapping both live Supabase (supabase_migration.sql)
+ * column names and frontend snapshot column names into ProgramCutoffViewRow.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function normalizeProgramCutoffRow(raw: Record<string, any>): ProgramCutoffViewRow {
+  let mediumArr: ('E' | 'S' | 'T')[] = ['E'];
+  if (Array.isArray(raw.medium)) {
+    mediumArr = raw.medium;
+  } else if (typeof raw.medium === 'string') {
+    const medLower = raw.medium.toLowerCase();
+    const arr: ('E' | 'S' | 'T')[] = [];
+    if (medLower.includes('english') || medLower.includes('e')) arr.push('E');
+    if (medLower.includes('sinhala') || medLower.includes('s')) arr.push('S');
+    if (medLower.includes('tamil') || medLower.includes('t')) arr.push('T');
+    mediumArr = arr.length > 0 ? arr : ['E'];
+  }
+
+  let minZ: number | null = null;
+  if (raw.min_z_score !== undefined && raw.min_z_score !== null) {
+    minZ = Number(raw.min_z_score);
+  } else if (raw.z_score_numeric !== undefined && raw.z_score_numeric !== null) {
+    minZ = Number(raw.z_score_numeric);
+  } else if (raw.cutoff_z !== undefined && raw.cutoff_z !== null) {
+    minZ = Number(raw.cutoff_z);
+  }
+
+  const isNqc =
+    raw.status === 'NQC' ||
+    raw.cutoff_status === 'NQC' ||
+    minZ === null;
+
+  return {
+    uni_code: String(raw.uni_code ?? ''),
+    course_code: String(raw.course_code ?? ''),
+    course_name: String(raw.course_name ?? raw.course_name_exact ?? 'UGC Course'),
+    stream: String(raw.stream ?? 'Other'),
+    faculty: String(raw.faculty ?? raw.faculty_name ?? ''),
+    degree_awarded: String(raw.degree_awarded ?? raw.degree_title_exact ?? raw.degree_title ?? 'BSc (Hons)'),
+    subject_requirements: raw.subject_requirements ?? { min_grade: 'S' },
+    course_description: String(raw.course_description ?? ''),
+    career_category: String(raw.career_category ?? 'General Higher Education'),
+    institution_code: String(raw.institution_code ?? ''),
+    institution_name: String(raw.institution_name ?? raw.university_name ?? 'State University'),
+    institution_type: String(raw.institution_type ?? 'University'),
+    institution_location: String(raw.institution_location ?? raw.campus_or_institute_exact ?? ''),
+    institution_website: String(raw.institution_website ?? raw.website_url ?? ''),
+    duration_years: Number(raw.duration_years ?? 4),
+    medium: mediumArr,
+    proposed_intake: Number(raw.proposed_intake ?? raw.proposed_intake_uni ?? raw.total_course_intake ?? 100),
+    aptitude_test_required: Boolean(raw.aptitude_test_required ?? raw.requires_aptitude_test),
+    all_island_merit_only: Boolean(raw.all_island_merit_only ?? raw.all_island_merit_marker),
+    district_id: Number(raw.district_id ?? 1),
+    district_name: String(raw.district_name ?? raw.district_exact ?? 'Colombo'),
+    academic_year: String(raw.academic_year ?? '2024/2025'),
+    min_z_score: isNqc ? null : minZ,
+    status: isNqc ? 'NQC' : 'QUALIFIED',
+    all_island_min_z: Number(raw.all_island_min_z ?? (minZ ? minZ - 0.25 : 1.2)),
+    all_island_max_z: Number(raw.all_island_max_z ?? (minZ ? minZ + 0.05 : 1.8)),
+    requires_ol_special: Boolean(raw.requires_ol_special ?? raw.requires_special_ol ?? false),
+    is_suspended: Boolean(raw.is_suspended ?? raw.intake_suspended ?? false),
+  };
+}
+
 export async function fetchProgramCutoffsByDistrict(districtId: number): Promise<ProgramCutoffViewRow[]> {
   const cacheKey = `v_program_cutoffs_d${districtId}`;
   const cached = getCached<ProgramCutoffViewRow[]>(cacheKey);
@@ -72,8 +136,10 @@ export async function fetchProgramCutoffsByDistrict(districtId: number): Promise
         .eq('district_id', districtId);
 
       if (!error && data && data.length > 0) {
-        setCached(cacheKey, data);
-        return data as ProgramCutoffViewRow[];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const normalized = data.map((r: any) => normalizeProgramCutoffRow(r));
+        setCached(cacheKey, normalized);
+        return normalized;
       }
     } catch {
       // Fallback to local snapshot when offline
@@ -100,7 +166,30 @@ export async function matchEligibleProgramsRpc(params: {
         p_stream,
       });
       if (!error && data && data.length > 0) {
-        return data as MatchedProgramRow[];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return data.map((r: any) => {
+          const base = normalizeProgramCutoffRow(r);
+          let chanceTier: ChanceTier = 'TARGET';
+          if (r.chance_category) {
+            const cat = String(r.chance_category).toUpperCase();
+            if (cat === 'SAFE') chanceTier = 'SAFE';
+            else if (cat === 'REACH') chanceTier = 'REACH';
+            else if (cat === 'UNLIKELY') chanceTier = 'REACH';
+          } else {
+            const cl = classifyProgramMatch({
+              studentZ: p_student_z,
+              minZScore: base.min_z_score,
+              status: base.status,
+              allIslandMeritOnly: base.all_island_merit_only,
+            });
+            chanceTier = cl.tier;
+          }
+          return {
+            ...base,
+            z_margin: r.z_margin !== undefined ? Number(r.z_margin) : (base.min_z_score !== null ? Number((p_student_z - base.min_z_score).toFixed(4)) : null),
+            chance_tier: chanceTier,
+          };
+        });
       }
     } catch {
       // Fallback to client-side evaluation of the exact RPC logic
@@ -138,13 +227,23 @@ export async function fetchAllDistrictCutoffsForUniCode(
   if (supabase) {
     try {
       const { data, error } = await supabase
-        .from('historical_cutoffs')
-        .select('district_id, district_name, min_z_score, status')
+        .from('v_program_cutoffs')
+        .select('*')
         .eq('uni_code', uniCode)
         .order('district_id', { ascending: true });
       if (!error && data && data.length > 0) {
-        setCached(cacheKey, data);
-        return data;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const mapped = data.map((row: any) => {
+          const norm = normalizeProgramCutoffRow(row);
+          return {
+            district_id: norm.district_id,
+            district_name: norm.district_name,
+            min_z_score: norm.min_z_score,
+            status: norm.status,
+          };
+        });
+        setCached(cacheKey, mapped);
+        return mapped;
       }
     } catch {
       // Fallback below

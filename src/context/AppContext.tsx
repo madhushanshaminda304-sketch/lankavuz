@@ -1,14 +1,16 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import {
   SRI_LANKA_DISTRICTS,
-  fetchProgramCutoffsByDistrict,
   type DistrictInfo,
   type ProgramCutoffViewRow,
-} from '../services/ugcDataService';
-import { optimizePreferenceOrder, type PreferencePlanItem } from '../lib/ugcLogic';
+} from '../data/sriLankaUgcSnapshot';
+import { fetchProgramCutoffsByDistrict } from '../services/ugcDataService';
+import {
+  optimizePreferenceOrder,
+  type PreferencePlanItem,
+} from '../lib/ugcLogic';
 
 export type LanguageCode = 'EN' | 'SI' | 'TA';
-
 export type ActiveRoute =
   | 'home'
   | 'predictor'
@@ -20,82 +22,30 @@ export type ActiveRoute =
   | 'institution'
   | 'course';
 
-interface Translations {
-  selectDistrict: string;
-  heroTitle: string;
-  heroSub: string;
-  myPlan: string;
-  navPredictor: string;
-  navCatalog: string;
-  navCompare: string;
-  navCareers: string;
-  navCalendar: string;
-  backupCta: string;
-}
-
-const I18N_DICT: Record<LanguageCode, Translations> = {
-  EN: {
-    selectDistrict: 'Select Your District',
-    heroTitle: 'Find Your Sri Lankan State University & Degree Path',
-    heroSub: 'Official 25-District UGC Z-Score Cutoff Atlas, 3-Subject A/L Matcher, Preference Order Simulator & MOHE Interest-Free Loan Bridge.',
-    myPlan: 'My UGC Plan',
-    navPredictor: 'Z-Score Predictor',
-    navCatalog: 'Universities & Courses',
-    navCompare: 'Compare (4-Way)',
-    navCareers: 'Career Compass',
-    navCalendar: 'Admissions Calendar',
-    backupCta: '1-Click Backup & Loan Form',
-  },
-  SI: {
-    selectDistrict: 'ඔබේ දිස්ත්‍රික්කය තෝරන්න',
-    heroTitle: 'ශ්‍රී ලංකා රාජ්‍ය විශ්වවිද්‍යාල සහ උපාධි මාර්ගෝපදේශය',
-    heroSub: 'දිස්ත්‍රික්ක 25 සඳහාම නිල UGC Z-ලකුණු කඩඉම්, A/L විෂය ගැලපුම සහ පොලී රහිත ශිෂ්‍ය ණය (IFSLS) විකල්ප.',
-    myPlan: 'මගේ UGC සැලැස්ම',
-    navPredictor: 'Z-ලකුණු පුරෝකථනය',
-    navCatalog: 'විශ්වවිද්‍යාල සහ පාඨමාලා',
-    navCompare: 'සංසන්දනය (4-Way)',
-    navCareers: 'වෘත්තීය මාර්ගෝපදේශය',
-    navCalendar: 'ඇතුළත් කිරීමේ දින දර්ශනය',
-    backupCta: 'පොලී රහිත ණය / විකල්ප අයදුම්පත',
-  },
-  TA: {
-    selectDistrict: 'உங்கள் மாவட்டத்தைத் தேர்ந்தெடுக்கவும்',
-    heroTitle: 'இலங்கை அரச பல்கலைக்கழக மற்றும் பட்டப்படிப்பு வழிகாட்டி',
-    heroSub: '25 மாவட்ட UGC Z-புள்ளி வெட்டுப்புள்ளிகள், க.பொ.த உயர்தரப் பாடப் பொருத்தம் மற்றும் வட்டியில்லா மாணவர் கடன் (IFSLS) வழிகாட்டி.',
-    myPlan: 'எனது UGC திட்டம்',
-    navPredictor: 'Z-புள்ளி கணிப்பான்',
-    navCatalog: 'பல்கலைக்கழகங்கள் & கற்கைகள்',
-    navCompare: 'ஒப்பிடுக (4-Way)',
-    navCareers: 'தொழில் வழிகாட்டி',
-    navCalendar: 'அனுமதி நாட்காட்டி',
-    backupCta: 'மாற்று பட்டப்படிப்பு விண்ணப்பம்',
-  },
-};
-
 export interface SavedPreferenceEntry {
   uni_code: string;
   locked: boolean;
 }
 
-interface AppContextValue {
+export interface AppContextValue {
   district: DistrictInfo;
   setDistrictId: (id: number) => void;
   isDistrictModalOpen: boolean;
   setIsDistrictModalOpen: (v: boolean) => void;
   lang: LanguageCode;
-  setLang: (l: LanguageCode) => void;
-  t: Translations;
+  setLang: (lang: LanguageCode) => void;
+  t: Record<string, string>;
   route: ActiveRoute;
   setRoute: (r: ActiveRoute) => void;
   selectedInstitutionCode: string;
   setSelectedInstitutionCode: (code: string) => void;
   selectedUniCode: string;
-  setSelectedUniCode: (code: string) => void;
+  setSelectedUniCode: (uniCode: string) => void;
   districtPrograms: ProgramCutoffViewRow[];
   studentZScore: number;
   setStudentZScore: (z: number) => void;
   studentStream: string;
-  setStudentStream: (s: string) => void;
+  setStudentStream: (stream: string) => void;
   planEntries: SavedPreferenceEntry[];
   addToPlan: (uniCode: string) => void;
   removeFromPlan: (uniCode: string) => void;
@@ -113,6 +63,51 @@ interface AppContextValue {
   openCourseProfile: (uniCode: string) => void;
 }
 
+const I18N_DICT: Record<LanguageCode, Record<string, string>> = {
+  EN: {
+    brandSubtitle: 'Sri Lanka UGC & Degree Atlas',
+    navPredictor: 'Z-Score Predictor',
+    navCatalog: 'Universities & Courses',
+    navCompare: 'Compare (4-Way)',
+    navCareers: 'Career Compass',
+    navCalendar: 'Admissions Calendar',
+    myPlan: 'My UGC Plan',
+    quotaBadge: 'Active Quota District',
+    changeDistrict: 'Change',
+    heroTag: 'Official 25-District UGC Z-Score Cutoff Atlas, 3-Subject A/L Matcher, Preference Order Simulator & MOHE Interest-Free Loan Bridge.',
+    searchPlaceholder: 'Search uni_code (001A, 008G), Medicine, CS, UOM...',
+    ctaSafeTargetReach: 'Check Safe / Target / Reach',
+  },
+  SI: {
+    brandSubtitle: 'ශ්‍රී ලංකා විශ්වවිද්‍යාල සහ උපාධි ඇට්ලස්',
+    navPredictor: 'Z-ලකුණු පුරෝකථනය',
+    navCatalog: 'විශ්වවිද්‍යාල සහ පාඨමාලා',
+    navCompare: 'සංසන්දනය (4-ක්‍රම)',
+    navCareers: 'වෘත්තීය මාලිමාව',
+    navCalendar: 'ඇතුළත් කිරීම් දින දර්ශනය',
+    myPlan: 'මගේ UGC සැලැස්ම',
+    quotaBadge: 'දිස්ත්‍රික් කෝටාව',
+    changeDistrict: 'වෙනස් කරන්න',
+    heroTag: 'නිල දිස්ත්‍රික් 25 UGC Z-ලකුණු සීමා, A/L විෂය 3 පරීක්ෂාව, මනාප ගැටුම් විසඳුම් සහ MOHE පොලී රහිත ණය පාලම.',
+    searchPlaceholder: 'uni_code (001A, 008G), වෛද්‍ය, CS, UOM සොයන්න...',
+    ctaSafeTargetReach: 'ආරක්ෂිත / ඉලක්ක / අපේක්ෂිත පරීක්ෂාව',
+  },
+  TA: {
+    brandSubtitle: 'இலங்கை UGC மற்றும் பட்டப்படிப்பு வழிகாட்டி',
+    navPredictor: 'Z-புள்ளி கணிப்பான்',
+    navCatalog: 'பல்கலைக்கழகங்கள் & பாடநெறிகள்',
+    navCompare: 'ஒப்பீடு (4-வழி)',
+    navCareers: 'தொழில் வழிகாட்டி',
+    navCalendar: 'சேர்க்கை நாட்காட்டி',
+    myPlan: 'எனது UGC திட்டம்',
+    quotaBadge: 'மாவட்ட ஒதுக்கீடு',
+    changeDistrict: 'மாற்று',
+    heroTag: 'அதிகாரப்பூர்வ 25 மாவட்ட UGC Z-புள்ளி வழிகாட்டி, 3-பாட A/L சேர்க்கை, விருப்ப ஒழுங்கு மற்றும் வட்டி இல்லாத கடன் பாலம்.',
+    searchPlaceholder: 'uni_code (001A, 008G), மருத்துவம், CS, UOM தேடுக...',
+    ctaSafeTargetReach: 'பாதுகாப்பான / இலக்கு / சாத்தியம் காண்க',
+  },
+};
+
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -127,9 +122,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [isDistrictModalOpen, setIsDistrictModalOpen] = useState(false);
   const [lang, setLang] = useState<LanguageCode>('EN');
-  const [route, setRoute] = useState<ActiveRoute>('home');
+  const [route, setRouteState] = useState<ActiveRoute>('home');
   const [selectedInstitutionCode, setSelectedInstitutionCode] = useState<string>('UOM');
-  const [selectedUniCode, setSelectedUniCode] = useState<string>('008A');
+  const [selectedUniCode, setSelectedUniCode] = useState<string>('008G');
 
   const [studentZScore, setStudentZScore] = useState<number>(1.52);
   const [studentStream, setStudentStream] = useState<string>('Physical Science');
@@ -144,14 +139,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Fallback
     }
     return [
-      { uni_code: '008A', locked: false },
-      { uni_code: '012A', locked: false },
+      { uni_code: '008G', locked: false },
+      { uni_code: '012T', locked: false },
       { uni_code: '013B', locked: false },
       { uni_code: '013A', locked: false },
     ];
   });
 
-  const [compareList, setCompareList] = useState<string[]>(['012A', '008A', '026A', '012F']);
+  const [compareList, setCompareList] = useState<string[]>(['012T', '026G', '012C', '136L']);
   const [isPlanDrawerOpen, setIsPlanDrawerOpen] = useState(false);
   const [isCafDrawerOpen, setIsCafDrawerOpen] = useState(false);
   const [districtPrograms, setDistrictPrograms] = useState<ProgramCutoffViewRow[]>([]);
@@ -160,6 +155,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     () => SRI_LANKA_DISTRICTS.find((d) => d.district_id === districtId) ?? SRI_LANKA_DISTRICTS[0],
     [districtId]
   );
+
+  // Two-way URL hash routing synchronization
+  const syncFromHash = useCallback(() => {
+    const hash = window.location.hash.replace(/^#/, '');
+    if (!hash) return;
+
+    if (hash.startsWith('institution/')) {
+      const code = hash.split('/')[1]?.toUpperCase();
+      if (code) {
+        setSelectedInstitutionCode(code);
+        setRouteState('institution');
+      }
+    } else if (hash.startsWith('course/')) {
+      const code = hash.split('/')[1]?.toUpperCase();
+      if (code) {
+        setSelectedUniCode(code);
+        setRouteState('course');
+      }
+    } else if (
+      ['home', 'predictor', 'my-plan', 'compare', 'careers', 'career-quiz', 'calendar'].includes(
+        hash
+      )
+    ) {
+      setRouteState(hash as ActiveRoute);
+    }
+  }, []);
+
+  useEffect(() => {
+    syncFromHash();
+    window.addEventListener('hashchange', syncFromHash);
+    return () => {
+      window.removeEventListener('hashchange', syncFromHash);
+    };
+  }, [syncFromHash]);
+
+  const setRoute = (newRoute: ActiveRoute) => {
+    setRouteState(newRoute);
+    if (newRoute === 'institution') {
+      window.location.hash = `institution/${selectedInstitutionCode}`;
+    } else if (newRoute === 'course') {
+      window.location.hash = `course/${selectedUniCode}`;
+    } else {
+      window.location.hash = newRoute;
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -191,7 +231,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [planEntries]);
 
   const addToPlan = (uniCode: string) => {
+    const prog = districtPrograms.find((p) => p.uni_code === uniCode);
+    if (prog?.is_suspended) {
+      alert(`Cannot add ${uniCode} (${prog.course_name}): Intake is currently suspended for 2025/2026 under UGC Curriculum Review.`);
+      return;
+    }
+
     setPlanEntries((prev) => {
+      if (prev.length >= 125) {
+        alert('Maximum 125 UGC preference choices allowed per candidate (UGC Rule Section 3.1.6).');
+        return prev;
+      }
       if (prev.some((p) => p.uni_code === uniCode)) return prev;
       return [...prev, { uni_code: uniCode, locked: false }];
     });
@@ -249,13 +299,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const openInstitutionProfile = (code: string) => {
     setSelectedInstitutionCode(code);
-    setRoute('institution');
+    setRouteState('institution');
+    window.location.hash = `institution/${code}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const openCourseProfile = (uniCode: string) => {
     setSelectedUniCode(uniCode);
-    setRoute('course');
+    setRouteState('course');
+    window.location.hash = `course/${uniCode}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

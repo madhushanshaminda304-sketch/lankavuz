@@ -13,20 +13,20 @@ import { NON_STATE_IFSLS_PATHWAYS } from '../services/ugcDataService';
 
 const POPULAR_PRESETS = [
   {
-    label: 'Computing: UCSC CS vs UOM IT vs USJP CS vs UOM AI',
-    codes: ['012A', '026A', '012F', '096A'],
+    label: 'Computing: UCSC CS (012T) vs UOM IT (026G) vs USJP CS (012C) vs SUSL DS (136L)',
+    codes: ['012T', '026G', '012C', '136L'],
   },
   {
-    label: 'Engineering: UOM vs UOP vs UOR vs USJP',
-    codes: ['008A', '008B', '008C', '008F'],
+    label: 'Engineering: UOM (008G) vs UOP (008B) vs UOR (008F) vs USJP (008C)',
+    codes: ['008G', '008B', '008F', '008C'],
   },
   {
-    label: 'Medicine: Colombo vs Peradeniya vs Jayewardenepura vs Kelaniya',
+    label: 'Medicine: Colombo (001A) vs Peradeniya (001B) vs Jayewardenepura (001C) vs Kelaniya (001D)',
     codes: ['001A', '001B', '001C', '001D'],
   },
   {
-    label: 'Engineering Tech (ET): USJP vs Kelaniya vs Ruhuna vs Wayamba',
-    codes: ['102A', '102B', '102C', '102E'],
+    label: 'Engineering Tech (ET): Colombo (102A) vs USJP (102C) vs Kelaniya (102D) vs Ruhuna (102F)',
+    codes: ['102A', '102C', '102D', '102F'],
   },
 ];
 
@@ -285,6 +285,31 @@ export const CompareEngineView: React.FC = () => {
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-50 text-emerald-800 text-xs font-semibold">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         No
+                      </span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            )}
+
+            {/* Special O/L Prerequisite */}
+            {(!highlightDiffsOnly || !rowsSame((p) => String(p.requires_ol_special))) && (
+              <tr>
+                <td className="p-4 font-bold text-slate-900 border-r border-slate-200">
+                  Special O/L Credit (Section 5.3)
+                </td>
+                {comparedPrograms.map((p) => (
+                  <td key={p.uni_code} className="p-4 border-r border-slate-100">
+                    {p.requires_ol_special ? (
+                      <span
+                        title="Special O/L Credit Required: Requires specific credit passes in English, Mathematics, or Science per Section 5.3 of UGC Handbook."
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-violet-100 text-violet-900 text-xs font-semibold cursor-help"
+                      >
+                        📋 Required (Sec 5.3)
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 text-slate-700 text-xs font-medium">
+                        Standard G.C.E. O/L Pass
                       </span>
                     )}
                   </td>

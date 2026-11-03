@@ -9,6 +9,7 @@ import {
 import {
   fetchProgramCutoffsByDistrict,
   matchEligibleProgramsRpc,
+  normalizeProgramCutoffRow,
 } from '../../services/ugcDataService';
 
 describe('ugcLogic — Sri Lankan UGC Z-Score & Preference Order Engine', () => {
@@ -68,12 +69,12 @@ describe('ugcLogic — Sri Lankan UGC Z-Score & Preference Order Engine', () => 
   it('auto-optimizes preference order by descending Z-score while respecting locked hometown overrides', () => {
     const preferences = [
       { uni_code: '013B', course_name: 'Physical Science', institution_code: 'UOP', min_z_score: 1.31, locked: false },
-      { uni_code: '008A', course_name: 'Engineering', institution_code: 'UOM', min_z_score: 1.985, locked: false },
+      { uni_code: '008G', course_name: 'Engineering', institution_code: 'UOM', min_z_score: 1.985, locked: false },
       { uni_code: '013C', course_name: 'Physical Science', institution_code: 'UOJ', min_z_score: 1.12, locked: true },
       { uni_code: '013A', course_name: 'Physical Science', institution_code: 'UOC', min_z_score: 1.485, locked: false },
     ];
     const optimized = optimizePreferenceOrder(preferences);
-    expect(optimized[0].uni_code).toBe('008A');
+    expect(optimized[0].uni_code).toBe('008G');
     expect(optimized[1].uni_code).toBe('013A');
     expect(optimized[2].uni_code).toBe('013C'); // Locked at index 2
     expect(optimized[3].uni_code).toBe('013B');
@@ -126,5 +127,64 @@ describe('ugcLogic — Sri Lankan UGC Z-Score & Preference Order Engine', () => 
     });
     expect(matches.length).toBeGreaterThan(0);
     expect(matches.every((m) => m.stream === 'Physical Science' || m.stream === 'Other')).toBe(true);
+  });
+
+  it('normalizes both live Supabase SQL view columns and offline snapshot columns seamlessly', () => {
+    // 1. Live Supabase v_program_cutoffs schema
+    const supabaseRow = {
+      uni_code: '008G',
+      course_name_exact: 'Engineering',
+      institution_code: 'UOM',
+      institution_name_official: 'University of Moratuwa',
+      stream: 'Physical Science',
+      intake_capacity: '450',
+      all_island_merit_only: false,
+      requires_aptitude_test: false,
+      z_score_numeric: '1.9850',
+      cutoff_status: 'QUALIFIED',
+      district_id: '1',
+      district_name: 'Colombo',
+      requires_special_ol: true,
+      intake_suspended: false,
+    };
+    const normSupabase = normalizeProgramCutoffRow(supabaseRow);
+    expect(normSupabase.uni_code).toBe('008G');
+    expect(normSupabase.course_name).toBe('Engineering');
+    expect(normSupabase.min_z_score).toBe(1.985);
+    expect(normSupabase.status).toBe('QUALIFIED');
+    expect(normSupabase.requires_ol_special).toBe(true);
+    expect(normSupabase.is_suspended).toBe(false);
+
+    // 2. Suspended course row
+    const suspendedRow = {
+      uni_code: '140P',
+      course_name_exact: 'Service Management',
+      institution_code: 'GWUIM',
+      z_score_numeric: null,
+      cutoff_status: 'NQC',
+      intake_suspended: true,
+    };
+    const normSuspended = normalizeProgramCutoffRow(suspendedRow);
+    expect(normSuspended.uni_code).toBe('140P');
+    expect(normSuspended.is_suspended).toBe(true);
+    expect(normSuspended.status).toBe('NQC');
+    expect(normSuspended.min_z_score).toBeNull();
+
+    // 3. Snapshot seed format
+    const snapshotRow = {
+      uni_code: '012T',
+      course_name: 'Information Technology',
+      institution_code: 'UCSC',
+      min_z_score: 1.542,
+      status: 'QUALIFIED',
+      requires_ol_special: false,
+      is_suspended: false,
+    };
+    const normSnapshot = normalizeProgramCutoffRow(snapshotRow);
+    expect(normSnapshot.uni_code).toBe('012T');
+    expect(normSnapshot.min_z_score).toBe(1.542);
+    expect(normSnapshot.status).toBe('QUALIFIED');
+    expect(normSnapshot.requires_ol_special).toBe(false);
+    expect(normSnapshot.is_suspended).toBe(false);
   });
 });

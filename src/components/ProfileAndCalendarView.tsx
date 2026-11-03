@@ -49,6 +49,15 @@ export const InstitutionAndCourseProfileView: React.FC<{ mode: 'institution' | '
   const [revComment, setRevComment] = useState('');
   const [revError, setRevError] = useState<string | null>(null);
 
+  // Interactive 1-5 Star Ratings
+  const [academicRating, setAcademicRating] = useState(5);
+  const [mahapolaRating, setMahapolaRating] = useState(5);
+  const [campusLifeRating, setCampusLifeRating] = useState(5);
+  const [employabilityRating, setEmployabilityRating] = useState(5);
+
+  // University-specific filtering toggle
+  const [filterByCurrentInstOnly, setFilterByCurrentInstOnly] = useState(true);
+
   // Q&A State
   const [qnaList, setQnaList] = useState(() => getQnAThreads());
   const [questionInput, setQuestionInput] = useState('');
@@ -75,6 +84,24 @@ export const InstitutionAndCourseProfileView: React.FC<{ mode: 'institution' | '
     );
   }, [districtPrograms, activeInstitution]);
 
+  const filteredReviews = useMemo(() => {
+    if (!filterByCurrentInstOnly) return reviews;
+    return reviews.filter(
+      (r) =>
+        r.institution_code === activeInstitution.institution_code ||
+        (mode === 'course' && activeProgram && r.uni_code === activeProgram.uni_code)
+    );
+  }, [reviews, filterByCurrentInstOnly, activeInstitution, activeProgram, mode]);
+
+  const filteredQna = useMemo(() => {
+    if (!filterByCurrentInstOnly) return qnaList;
+    return qnaList.filter(
+      (q) =>
+        q.institution_code === activeInstitution.institution_code ||
+        (mode === 'course' && activeProgram && q.uni_code === activeProgram.uni_code)
+    );
+  }, [qnaList, filterByCurrentInstOnly, activeInstitution, activeProgram, mode]);
+
   useEffect(() => {
     if (!activeProgram) return;
     let mounted = true;
@@ -92,14 +119,14 @@ export const InstitutionAndCourseProfileView: React.FC<{ mode: 'institution' | '
     try {
       await submitCampusReview({
         institution_code: activeInstitution.institution_code,
-        uni_code: activeProgram?.uni_code ?? '008A',
+        uni_code: activeProgram?.uni_code ?? '008G',
         student_name: revName,
         student_email: revEmail,
-        academic_rating: 5,
+        academic_rating: academicRating,
         hostel_cost_lkr: revHostelLkr,
-        mahapola_rating: 5,
-        campus_life_rating: 5,
-        employability_rating: 5,
+        mahapola_rating: mahapolaRating,
+        campus_life_rating: campusLifeRating,
+        employability_rating: employabilityRating,
         comment: revComment,
       });
       setReviews(getCampusReviews());
@@ -117,13 +144,43 @@ export const InstitutionAndCourseProfileView: React.FC<{ mode: 'institution' | '
     if (!questionInput.trim()) return;
     submitQnAQuestion({
       institution_code: activeInstitution.institution_code,
-      uni_code: activeProgram?.uni_code ?? '008A',
+      uni_code: activeProgram?.uni_code ?? '008G',
       asked_by: askedByInput,
       question: questionInput,
     });
     setQnaList(getQnAThreads());
     setQuestionInput('');
   };
+
+  const renderStarPicker = (
+    label: string,
+    value: number,
+    onChange: (v: number) => void
+  ) => (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-bold text-slate-700">{label}</span>
+        <span className="font-tabular font-extrabold text-amber-600">{value} / 5</span>
+      </div>
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => onChange(star)}
+            className="p-1 rounded hover:bg-amber-50"
+            aria-label={`${label} ${star} of 5 stars`}
+          >
+            <Star
+              className={`w-4 h-4 ${
+                star <= value ? 'fill-amber-400 text-amber-500' : 'text-slate-300'
+              }`}
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 
   if (!activeProgram) return null;
 
@@ -400,6 +457,12 @@ export const InstitutionAndCourseProfileView: React.FC<{ mode: 'institution' | '
                   />
                 </div>
               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
+                {renderStarPicker('Academic Quality', academicRating, setAcademicRating)}
+                {renderStarPicker('Mahapola & Bursary Support', mahapolaRating, setMahapolaRating)}
+                {renderStarPicker('Campus Life & Safety', campusLifeRating, setCampusLifeRating)}
+                {renderStarPicker('Graduate Employability', employabilityRating, setEmployabilityRating)}
+              </div>
               <div>
                 <label htmlFor="rev-comment" className="block text-xs font-bold text-slate-700 mb-1">
                   Your Review on Academics, Hostels, Mahapola & Internships *
@@ -431,44 +494,91 @@ export const InstitutionAndCourseProfileView: React.FC<{ mode: 'institution' | '
             </form>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {reviews.map((rev) => (
-              <article
-                key={rev.id}
-                className="bg-white rounded-xl border border-slate-200 p-5 space-y-3"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-slate-900">{rev.student_name}</span>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-bold">
-                        ✓ Verified .ac.lk ({rev.institution_code})
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-700">Filter:</span>
+              <span className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-800 font-semibold">
+                {filterByCurrentInstOnly
+                  ? `Showing ${activeInstitution.name} (${filteredReviews.length})`
+                  : `Showing All Universities (${reviews.length})`}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFilterByCurrentInstOnly(!filterByCurrentInstOnly)}
+              className="text-amber-700 hover:text-amber-800 font-bold underline cursor-pointer"
+            >
+              {filterByCurrentInstOnly
+                ? `Show All Universities (${reviews.length})`
+                : `Show ${activeInstitution.name} Only`}
+            </button>
+          </div>
+
+          {filteredReviews.length === 0 ? (
+            <div className="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-8 text-center space-y-3">
+              <p className="text-slate-600 text-sm">
+                No verified reviews yet specifically for <strong>{activeInstitution.name}</strong>.
+              </p>
+              <div className="flex justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFilterByCurrentInstOnly(false)}
+                  className="px-3.5 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold"
+                >
+                  Show All Universities ({reviews.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowReviewModal(true)}
+                  className="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold"
+                >
+                  + Be First to Review
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredReviews.map((rev) => (
+                <article
+                  key={rev.id}
+                  className="bg-white rounded-xl border border-slate-200 p-5 space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-slate-900">{rev.student_name}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-bold">
+                          ✓ Verified .ac.lk ({rev.institution_code})
+                        </span>
+                      </div>
+                      <span className="text-xs text-slate-500">
+                        Program {rev.uni_code} · Posted {rev.created_at}
                       </span>
                     </div>
-                    <span className="text-xs text-slate-500">
-                      Program {rev.uni_code} · Posted {rev.created_at}
+                    <div className="flex items-center gap-1 text-amber-500 font-tabular font-extrabold text-sm">
+                      <Star className="w-4 h-4 fill-amber-400" />
+                      <span>{rev.academic_rating}.0 / 5.0</span>
+                    </div>
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{rev.comment}</p>
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100 text-[11px] font-semibold text-slate-600">
+                    <span className="px-2 py-0.5 rounded bg-slate-100">
+                      Hostel: LKR {rev.hostel_cost_lkr.toLocaleString()}
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-slate-100">
+                      Mahapola/Bursary: {rev.mahapola_rating}/5
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-slate-100">
+                      Campus Life: {rev.campus_life_rating ?? 4}/5
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-slate-100">
+                      Employability: {rev.employability_rating}/5
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 text-amber-500 font-tabular font-extrabold text-sm">
-                    <Star className="w-4 h-4 fill-amber-400" />
-                    <span>{rev.academic_rating}.0 / 5.0</span>
-                  </div>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{rev.comment}</p>
-                <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100 text-[11px] font-semibold text-slate-600">
-                  <span className="px-2 py-0.5 rounded bg-slate-100">
-                    Hostel: LKR {rev.hostel_cost_lkr.toLocaleString()}
-                  </span>
-                  <span className="px-2 py-0.5 rounded bg-slate-100">
-                    Mahapola/Bursary: {rev.mahapola_rating}/5
-                  </span>
-                  <span className="px-2 py-0.5 rounded bg-slate-100">
-                    Employability: {rev.employability_rating}/5
-                  </span>
-                </div>
-              </article>
-            ))}
-          </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
@@ -512,31 +622,68 @@ export const InstitutionAndCourseProfileView: React.FC<{ mode: 'institution' | '
             </div>
           </form>
 
-          <div className="space-y-3">
-            {qnaList.map((thread) => (
-              <div
-                key={thread.id}
-                className="bg-white rounded-xl border border-slate-200 p-5 space-y-2.5"
-              >
-                <div className="flex items-center justify-between text-xs text-slate-500">
-                  <span className="font-bold text-slate-800">
-                    Q from {thread.asked_by} · ({thread.uni_code} · {thread.institution_code})
-                  </span>
-                  <span>{thread.created_at}</span>
-                </div>
-                <h3 className="text-sm sm:text-base font-extrabold text-slate-900">
-                  "{thread.question}"
-                </h3>
-                <div className="p-3.5 rounded-lg bg-emerald-50/70 border border-emerald-200 text-xs sm:text-sm text-slate-800 space-y-1">
-                  <div className="font-bold text-emerald-900 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-700" />
-                    <span>{thread.answered_by_role}</span>
-                  </div>
-                  <p className="leading-relaxed">{thread.answer}</p>
-                </div>
-              </div>
-            ))}
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-700">Filter:</span>
+              <span className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-800 font-semibold">
+                {filterByCurrentInstOnly
+                  ? `Showing ${activeInstitution.name} (${filteredQna.length})`
+                  : `Showing All Universities (${qnaList.length})`}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFilterByCurrentInstOnly(!filterByCurrentInstOnly)}
+              className="text-amber-700 hover:text-amber-800 font-bold underline cursor-pointer"
+            >
+              {filterByCurrentInstOnly
+                ? `Show All Universities (${qnaList.length})`
+                : `Show ${activeInstitution.name} Only`}
+            </button>
           </div>
+
+          {filteredQna.length === 0 ? (
+            <div className="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-8 text-center space-y-3">
+              <p className="text-slate-600 text-sm">
+                No Q&amp;A threads yet specifically for <strong>{activeInstitution.name}</strong>.
+              </p>
+              <div className="flex justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFilterByCurrentInstOnly(false)}
+                  className="px-3.5 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold"
+                >
+                  Show All Universities ({qnaList.length})
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredQna.map((thread) => (
+                <div
+                  key={thread.id}
+                  className="bg-white rounded-xl border border-slate-200 p-5 space-y-2.5"
+                >
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <span className="font-bold text-slate-800">
+                      Q from {thread.asked_by} · ({thread.uni_code} · {thread.institution_code})
+                    </span>
+                    <span>{thread.created_at}</span>
+                  </div>
+                  <h3 className="text-sm sm:text-base font-extrabold text-slate-900">
+                    "{thread.question}"
+                  </h3>
+                  <div className="p-3.5 rounded-lg bg-emerald-50/70 border border-emerald-200 text-xs sm:text-sm text-slate-800 space-y-1">
+                    <div className="font-bold text-emerald-900 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+                      <span>{thread.answered_by_role}</span>
+                    </div>
+                    <p className="leading-relaxed">{thread.answer}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       )}
     </div>

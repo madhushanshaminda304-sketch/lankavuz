@@ -122,9 +122,22 @@ export const ProgramChanceCard: React.FC<{
           · {program.institution_location}
         </p>
 
-        {/* Special UGC Rule Badges (Aptitude Test / All-Island Merit / NQC) */}
-        {(program.aptitude_test_required || program.all_island_merit_only || program.status === 'NQC') && (
+        {/* Special UGC Rule Badges (Suspended / Aptitude Test / All-Island Merit / Special O/L / NQC) */}
+        {(program.is_suspended || program.requires_ol_special || program.aptitude_test_required || program.all_island_merit_only || program.status === 'NQC') && (
           <div className="flex flex-wrap gap-1.5 mt-3">
+            {program.is_suspended && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-rose-100 text-rose-950 border border-rose-400">
+                ⛔ Suspended for 2025/2026 Intake (Curriculum Review)
+              </span>
+            )}
+            {program.requires_ol_special && (
+              <span
+                title="G.C.E. O/L Special Prerequisite: Candidate must have obtained specific credit passes in English, Mathematics, or Science (UGC Handbook Section 5.3)."
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-violet-100 text-violet-900 border border-violet-300 cursor-help"
+              >
+                📋 Special O/L Credit Required — Section 5.3
+              </span>
+            )}
             {program.aptitude_test_required && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 text-amber-950 border border-amber-400">
                 <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
@@ -195,14 +208,19 @@ export const ProgramChanceCard: React.FC<{
       <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
         <button
           type="button"
+          disabled={program.is_suspended}
           onClick={() => (isInPlan ? removeFromPlan(program.uni_code) : addToPlan(program.uni_code))}
           className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold interactive-surface ${
-            isInPlan
+            program.is_suspended
+              ? 'bg-slate-300 text-slate-600 cursor-not-allowed opacity-75'
+              : isInPlan
               ? 'bg-emerald-700 text-white hover:bg-emerald-800'
               : 'bg-[var(--color-brand-primary)] text-white hover:bg-slate-800'
           }`}
         >
-          {isInPlan ? (
+          {program.is_suspended ? (
+            <span>⛔ Intake Suspended</span>
+          ) : isInPlan ? (
             <>
               <Check className="w-3.5 h-3.5" />
               <span>Saved in My UGC Plan</span>
